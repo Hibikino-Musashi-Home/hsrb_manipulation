@@ -1,17 +1,16 @@
 <package format="3">
   <name>hsrb_manipulation_launch</name>
-  <version>2.0.0</version>
-  <description>Launch files and basic configurations for HSR-B manipulation</description>
+  <version>2.1.0</version>
+  <description>A package that compiles manipulation-related launches for use with HSR-B.</description>
   <maintainer email="xr-hsr-support@mail.toyota.co.jp">HSR Support</maintainer>
 
   <license>BSD 3-clause Clear License</license>
 
   <url type="website">None</url>
 
-  <author>Hiroaki Yaguchi</author>
-  <author>Keisuke Takeshita</author>
-  <author>Tomohiro Ono</author>
+  <author>Koji Terada</author>
 
+  <exec_depend>hsrb_analytic_ik</exec_depend>
   <exec_depend>hsrb_timeopt_ros</exec_depend>
   <exec_depend>tmc_robot_rrt_planner_node</exec_depend>
   <exec_depend>tmc_safe_pose_changer</exec_depend>

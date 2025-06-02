@@ -34,7 +34,7 @@ DAMAGE.
 namespace opt {
 
 /**
- * Two -dimensional vector class.
+ * This is a 2D vector class.
  */
 struct Vector2 {
   double v1;
@@ -54,7 +54,7 @@ struct Vector2 {
   }
 
   /**
-   * Set the value.
+   * Sets the values.
    */
   void Set(double a1, double a2) {
     v1 = a1;
@@ -62,7 +62,7 @@ struct Vector2 {
   }
 
   /**
-   * Zero vector.
+   * Makes this a zero vector.
    */
   void Zero() {
     v1 = 0;
@@ -70,7 +70,7 @@ struct Vector2 {
   }
 
   /**
-   * Normalize to the unit vector.
+   * Normalizes to a unit vector.
    */
   void Normalize(void) {
     double a = 1 / Norm();
@@ -79,21 +79,21 @@ struct Vector2 {
   }
 
   /**
-   * Calculate Norm.
+   * Computes the norm.
    */
   double Norm(void) {
     return std::sqrt(v1 * v1 + v2 * v2);
   }
 
   /**
-   * Calculate the Norm's square.
+   * Computes the squared norm.
    */
   double Norm2(void) {
     return (v1 * v1 + v2 * v2);
   }
 
   /**
-   * Calculate the norm between two points.
+   * Computes the norm between two points.
    */
   static double Norm(const Vector2& x, const Vector2& y) {
     double d1 = x.v1 - y.v1;
@@ -102,14 +102,14 @@ struct Vector2 {
   }
 
   /**
-   * Create two intermediate points.
+   * Creates the midpoint of two points.
    */
   static Vector2 Mid(const Vector2& x, const Vector2& y) {
     return Vector2((x.v1 + y.v1) * 0.5, (x.v2 + y.v2) * 0.5);
   }
 
   /**
-   * Calculate the inner pile x '* y.
+   * Computes the inner product x'*y.
    */
   static double Dot(const Vector2& x, const Vector2& y) {
     return (x.v1 * y.v1 + x.v2 * y.v2);

@@ -25,7 +25,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGE.
 */
-/// @brief Test of a class that performs a golden split linear search method
+/// @brief Test class for performing golden section line search method
 #include <gtest/gtest.h>
 
 #include "functions_for_testing.hpp"
@@ -33,13 +33,13 @@ DAMAGE.
 
 namespace opt {
 ////////////////////////////////////////////////////////////////////////////////
-//// Test by primary function A
+//// Test using linear function A
 
 TEST(GoldenSectionLineSearch_Test, LinearFunction1A_Test) {
   int maxItor = 100;
   double epsilon = 1e-8;
 
-  // Explore in the section [0,2].X = 0 is solved.
+  // Search within interval [0,2]. x=0 will be the solution.
   {
     LinearFunction1A func;
     GoldenSectionLineSearch search(maxItor, epsilon);
@@ -47,25 +47,25 @@ TEST(GoldenSectionLineSearch_Test, LinearFunction1A_Test) {
     double b = 2.0;
     double expected = 0.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(0 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon);
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//// Test by secondary function A
+//// Test using quadratic function A
 
 TEST(GoldenSectionLineSearch_Test, QuadraticFunction1A_Test) {
   QuadraticFunction1A func;
@@ -74,143 +74,143 @@ TEST(GoldenSectionLineSearch_Test, QuadraticFunction1A_Test) {
   double epsilon = 1e-8;
   GoldenSectionLineSearch search(maxItor, epsilon);
 
-  // Explore in the section [0,2].X = 1 is solved.
+  // Search within interval [0,2]. x=1 will be the solution.
   {
     double a = 0.0;
     double b = 2.0;
     double expected = 1.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
-    // [Semo] An error from the true value due to the calculation error of the function value
-    //  It does not necessarily mean that it will be less than the error of the uncertain section, so
-    //  Here, the error is verified by 10 times.
+    // Validate the solution.
+    // 【Note】Due to calculation error of function values, the error with true value
+    // might not be less than the uncertainty interval error, therefore,
+    // Multiply the error by 10 for verification here.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon * 10);
   }
 
-  // Explore in the section [0,1].X = 1 is solved.
+  // Search within interval [0,1]. x=1 will be the solution.
   {
     double a = 0.0;
     double b = 1.0;
     double expected = 1.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon * 10);
   }
 
-  // Explore in the section [1,2].X = 1 is solved.
+  // Search within interval [1,2]. x=1 will be the solution.
   {
     double a = 1.0;
     double b = 2.0;
     double expected = 1.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon * 10);
   }
 
-  // Explore in the section [-4, -1].X = -1 is solved.
+  // Search within interval [-4,-1]. x=-1 will be the solution.
   {
     double a = -4.0;
     double b = -1.0;
     double expected = -1.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon * 10);
   }
 
-  // Explore in the section [2, 8].X = 2 is solved.
+  // Search within interval [2, 8]. x=2 will be the solution.
   {
     double a = 2.0;
     double b = 8.0;
     double expected = 2.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon * 10);
   }
 
-  // Explore in the section [0,2].X = 1 is solved.
-  // Verify that OptMaxitor is returned with a limited number of repetitions.
+  // Search within interval [0,2]. x=1 will be the solution.
+  // Verify that OptMaxItor is returned by limiting the number of iterations.
   {
     double a = 0.0;
     double b = 2.0;
     double expected = 1.0;
 
-    // Explore and get the number of repetitions.
+    // Perform search and obtain the number of iterations.
     OptResult result = search.Search(func, a, b);
     int iteration = search.iteration();
 
-    // Explore only one repetitive number.
+    // Perform search with one less iteration.
     search.set_max_iteration(iteration - 1);
     result = search.Search(func, a, b);
     EXPECT_EQ(OptMaxItor, result);
     EXPECT_EQ(OptMaxItor, search.result());
 
-    // Make sure the number of repetitions is the maximum.
+    // Confirm the iterations have reached maximum.
     EXPECT_EQ(iteration - 1, search.iteration());
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//// Tests with unauthorized functions
+//// Test using non-differentiable function
 
 TEST(GoldenSectionLineSearch_Test, NonDiffenrentialFunction1A_Test) {
   NonDiffenrentialFunction1A func;
@@ -219,119 +219,119 @@ TEST(GoldenSectionLineSearch_Test, NonDiffenrentialFunction1A_Test) {
   double epsilon = 1e-8;
   GoldenSectionLineSearch search(maxItor, epsilon);
 
-  // Explore in the section [-2, 2].X = -1 is solved.
+  // Search within interval [-2, 2]. x=-1 will be the solution.
   {
     double a = -2.0;
     double b = 2.0;
     double expected = -1.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon);
   }
 
-  // Explore in the section [-2, -1].X = -1 is solved.
+  // Search within interval [-2, -1]. x=-1 will be the solution.
   {
     double a = -2.0;
     double b = -1.0;
     double expected = -1.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon);
   }
 
-  // Explore in the section [-1, 2].X = -1 is solved.
+  // Search within interval [-1, 2]. x=-1 will be the solution.
   {
     double a = -1.0;
     double b = 2.0;
     double expected = -1.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon);
   }
 
-  // Explore in the section [-4, -3].X = -3 is the solution.
+  // Search within interval [-4, -3]. x=-3 will be the solution.
   {
     double a = -4.0;
     double b = -3.0;
     double expected = -3.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon);
   }
 
-  // Explore in the section [3, 4].X = 3 is solved.
+  // Search within interval [3, 4]. x=3 will be the solution.
   {
     double a = 3.0;
     double b = 4.0;
     double expected = 3.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon);
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//// Test by inverted function function
+//// Test using inverse trapezoidal function
 
 TEST(GoldenSectionLineSearch_Test, InvertedTrapeziumFunction1A_Test) {
   InvertedTrapeziumFunction1A func;
@@ -340,100 +340,100 @@ TEST(GoldenSectionLineSearch_Test, InvertedTrapeziumFunction1A_Test) {
   double epsilon = 1e-8;
   GoldenSectionLineSearch search(maxItor, epsilon);
 
-  // Explore in the section [-5, 5].x∈ [-1,2] is the solution.
+  // Search within interval [-5, 5]. x∈[-1,2] will be the solution.
   {
     double a = -5.0;
     double b = 5.0;
     double expected1 = -1.0;
     double expected2 = 2.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_TRUE(
                 expected1 - epsilon <= solution
                 && solution <= expected2 + epsilon);
   }
 
-  // Explore in the section [-1/2, 1/2].x∈ [-1/2,1/2] is solved.
+  // Search within interval [-1/2, 1/2]. x∈[-1/2,1/2] will be the solution.
   {
     double a = -0.5;
     double b = 0.5;
     double expected1 = -0.5;
     double expected2 = 0.5;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_TRUE(
                 expected1 - epsilon <= solution
                 && solution <= expected2 + epsilon);
   }
 
-  // Explore in the section [-5, 0].x∈ [-1,0] is the solution.
+  // Search within interval [-5, 0]. x∈[-1,0] will be the solution.
   {
     double a = -5.0;
     double b = 0.0;
     double expected1 = -1.0;
     double expected2 = 0.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_TRUE(
                 expected1 - epsilon <= solution
                 && solution <= expected2 + epsilon);
   }
 
-  // Explore in the section [1, 3].X∈ [1, 2] is the solution.
+  // Search within interval [1, 3]. x∈[1,2] will be the solution.
   {
     double a = 1.0;
     double b = 3.0;
     double expected1 = 1.0;
     double expected2 = 2.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_TRUE(
                 expected1 - epsilon <= solution
@@ -442,7 +442,7 @@ TEST(GoldenSectionLineSearch_Test, InvertedTrapeziumFunction1A_Test) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//// Test by unexpected function A
+//// Test using discontinuous function A
 
 TEST(GoldenSectionLineSearch_Test, DiscontinuousFunction1A_Test) {
   DiscontinuousFunction1A func;
@@ -451,141 +451,141 @@ TEST(GoldenSectionLineSearch_Test, DiscontinuousFunction1A_Test) {
   double epsilon = 1e-8;
   GoldenSectionLineSearch search(maxItor, epsilon);
 
-  // Explore in the section [-5, 5].X = 1 is solved.
+  // Search within interval [-5, 5]. x=1 will be the solution.
   {
     double a = -5.0;
     double b = 5.0;
     double expected = 1.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon);
   }
 
-  // Explore in the section [0, 3].X = 1 is solved.
+  // Search within interval [0, 3]. x=1 will be the solution.
   {
     double a = 0.0;
     double b = 3.0;
     double expected = 1.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon);
   }
 
-  // Search by section [0, 1].X = 1 is solved.
+  // Search within interval [0, 1]. x=1 will be the solution.
   {
     double a = 0.0;
     double b = 1.0;
     double expected = 1.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon);
   }
 
-  // Explore in the section [0, 2].X = 1 is solved.
+  // Search within interval [0, 2]. x=1 will be the solution.
   {
     double a = 0.0;
     double b = 1.0;
     double expected = 1.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon);
   }
 
-  // Explore in the section [1, 3].X = 1 is solved.
+  // Search within interval [1, 3]. x=1 will be the solution.
   {
     double a = 1.0;
     double b = 3.0;
     double expected = 1.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon);
   }
 
-  // Explore in the section [1.5, 3].X = 1.5 is solved.
+  // Search within interval [1.5, 3]. x=1.5 will be the solution.
   {
     double a = 1.5;
     double b = 3.0;
     double expected = 1.5;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon);
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//// Test by unexpected function B
+//// Test using discontinuous function B
 
 TEST(GoldenSectionLineSearch_Test, DiscontinuousFunction1B_Test) {
   double penalty = 1e8;
@@ -594,31 +594,31 @@ TEST(GoldenSectionLineSearch_Test, DiscontinuousFunction1B_Test) {
   double epsilon = 1e-8;
   GoldenSectionLineSearch search(maxItor, epsilon);
 
-  // Search by section [-100, 100].X = 0 is solved.
+  // Search within interval [-100, 100]. x=0 will be the solution.
   {
     double a = -20;
     double b = 20;
     double expected = 0.0;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon * 10);
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//// Announced tests due to a non -convex function
+//// Abnormal case test using non-convex function
 
 TEST(GoldenSectionLineSearch_Test, NonConvexFunction1A_Test) {
   NonConvexFunction1A func;
@@ -627,25 +627,25 @@ TEST(GoldenSectionLineSearch_Test, NonConvexFunction1A_Test) {
   double epsilon = 1e-8;
   GoldenSectionLineSearch search(maxItor, epsilon);
 
-  // Explore in the section [0, 4].
-  // The search results should be 1.5.
+  // Search within interval [0, 4].
+  // The search result should be 1.5.
   {
     double a = 0;
     double b = 4;
     double expected = 1.5;
 
-    // I will search.
+    // Perform the search.
     OptResult result = search.Search(func, a, b);
 
     // Verify the search results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Check the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(1 <= iteration && iteration <= maxItor);
 
-    // Verify the solution.
+    // Validate the solution.
     double solution = search.solution();
     EXPECT_NEAR(solution, expected, epsilon * 10);
   }

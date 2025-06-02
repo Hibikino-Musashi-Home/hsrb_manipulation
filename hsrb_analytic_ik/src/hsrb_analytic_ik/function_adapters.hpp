@@ -25,7 +25,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGE.
 */
-/// @brief A group of adapters that operate the function
+/// @brief Adapter group for operations on functions
 #ifndef HSRB_ANALYTIC_IK_FUNCTION_ADAPTERS_HPP_
 #define HSRB_ANALYTIC_IK_FUNCTION_ADAPTERS_HPP_
 
@@ -35,7 +35,7 @@ DAMAGE.
 namespace opt {
 
 /**
- * This is an adapter that performs an X -axis direction to a variable function.
+ * An adapter that performs a shift in the x-axis direction for a single variable function.
  */
 template<class Function1>
 class ShiftAdapterFunction1 {
@@ -63,7 +63,7 @@ class ShiftAdapterFunction1 {
 };
 
 /**
- * An adapter that reverses the X -axis direction for one variable function.
+ * An adapter that reverses the x-axis direction for a single variable function.
  */
 template<class Function1>
 class ReverseAdapterFunction1 {
@@ -90,7 +90,7 @@ class ReverseAdapterFunction1 {
 };
 
 /**
- * 2 This adapter is converted to one variable function G (u) = f (x + u * d), which is straightened in a specific direction.
+ * An adapter that converts a two-variable function f(x) into a linearized single-variable function g(u)=f(x + u * d) in a specific direction.
  */
 template<class Function2>
 class DirectionAdapterFunction2 {

@@ -1,0 +1,9 @@
+<library path="hsrb_planner_plugins">
+  <class name="hsrb_planner_plugins/LookHand"
+         type="hsrb_planner_plugins::LookHand"
+         base_class_type="tmc_robot_planner::IConfigurationConstraint">
+     <description>
+       This is a look hand plugin.
+     </description>
+  </class>
+</library>

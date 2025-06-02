@@ -36,7 +36,7 @@ DAMAGE.
 namespace hsrb_analytic_ik {
 
 struct RobotParameter {
-  // Mechanism set value
+  // Mechanism configuration values
   double L3;
   double L41;
   double L42;
@@ -45,7 +45,7 @@ struct RobotParameter {
   double L81;
   double L82;
 
-  // Movement range of joints
+  // Joint movement range
   double t3_min;
   double t3_max;
   double t4_min;
@@ -62,7 +62,7 @@ struct RobotParameter {
 
 struct BasePositionRange {
   std::array<double, 2> center;
-  // If either min/max is negative
+  // Invalid BasePositionRange if either min/max is negative
   double radius_min;
   double radius_max;
 
@@ -79,6 +79,16 @@ class HybridIKSolverBase : public tmc_robot_kinematics_model::IKSolver {
 
   virtual ~HybridIKSolverBase() = default;
 
+  /// Solve IK allowing base movement
+  /// @param [IN] request Target end-effector position and initial values, etc.
+  /// @param [IN] interrupt Interrupt function
+  /// @param [OUT] solution_angle_out Solution of the arm joint angles
+  /// @param [OUT] origin_to_base_out Solution of the platform part
+  /// @param [OUT] origin_to_end_out Solution end-effector position. Should almost match the target end-effector position
+  /// @retval kSuccess Success
+  /// @retval kConverge Converged to a non-solution
+  /// @retval kMaxItr Maximum iteration count reached
+  /// @retval kFail Failure. No solution.
   tmc_robot_kinematics_model::IKResult Solve(
       const tmc_robot_kinematics_model::IKRequest& request,
       std::function<bool()>& interrupt,
@@ -86,6 +96,12 @@ class HybridIKSolverBase : public tmc_robot_kinematics_model::IKSolver {
       Eigen::Affine3d& origin_to_base_out,
       Eigen::Affine3d& origin_to_end_out) override;
 
+  /// Solve IK
+  /// @param [IN] request IK request
+  /// @param [IN] interrupt Interrupt function
+  /// @param [OUT] responses_out Solution to IK
+  /// @retval kSuccess One or more IK solutions obtained
+  /// @retval kFail Failure. No solutions
   tmc_robot_kinematics_model::IKResult Solve(
       const tmc_robot_kinematics_model::IKRequest& request,
       std::function<bool()>& interrupt,
@@ -104,6 +120,16 @@ class BaseYawIKSolver : public tmc_robot_kinematics_model::IKSolver {
 
   virtual ~BaseYawIKSolver() = default;
 
+  /// Solve IK allowing base movement
+  /// @param [IN] request Target end-effector position and initial values, etc.
+  /// @param [IN] interrupt Interrupt function
+  /// @param [OUT] solution_angle_out Solution of the arm joint angles
+  /// @param [OUT] origin_to_base_out Solution of the platform part
+  /// @param [OUT] origin_to_end_out Solution end-effector position. Should almost match the target end-effector position
+  /// @retval kSuccess Success
+  /// @retval kConverge Converged to a non-solution
+  /// @retval kMaxItr Maximum iteration count reached
+  /// @retval kFail Failure. No solution.
   tmc_robot_kinematics_model::IKResult Solve(
       const tmc_robot_kinematics_model::IKRequest& request,
       std::function<bool()>& interrupt,
@@ -111,6 +137,12 @@ class BaseYawIKSolver : public tmc_robot_kinematics_model::IKSolver {
       Eigen::Affine3d& origin_to_base_out,
       Eigen::Affine3d& origin_to_end_out) override;
 
+  /// Solve IK
+  /// @param [IN] request IK request
+  /// @param [IN] interrupt Interrupt function
+  /// @param [OUT] responses_out Solution to IK
+  /// @retval kSuccess One or more IK solutions obtained
+  /// @retval kFail Failure. No solutions
   tmc_robot_kinematics_model::IKResult Solve(
       const tmc_robot_kinematics_model::IKRequest& request,
       std::function<bool()>& interrupt,

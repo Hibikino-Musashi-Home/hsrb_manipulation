@@ -1,31 +1,29 @@
 #!/usr/bin/env python
-'''
-Copyright (c) 2024 TOYOTA MOTOR CORPORATION
-All rights reserved.
-Redistribution and use in source and binary forms, with or without
-modification, are permitted (subject to the limitations in the disclaimer
-below) provided that the following conditions are met:
-* Redistributions of source code must retain the above copyright notice, this
-  list of conditions and the following disclaimer.
-* Redistributions in binary form must reproduce the above copyright notice,
-  this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.
-* Neither the name of the copyright holder nor the names of its contributors may be used
-  to endorse or promote products derived from this software without specific
-  prior written permission.
-NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
-LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-DAMAGE.
-'''
+# Copyright (c) 2024 TOYOTA MOTOR CORPORATION
+# All rights reserved.
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted (subject to the limitations in the disclaimer
+# below) provided that the following conditions are met:
+# * Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+# * Neither the name of the copyright holder nor the names of its contributors may be used
+#   to endorse or promote products derived from this software without specific
+#   prior written permission.
+# NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
+# LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+# THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+# OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+# DAMAGE.
 # -*- coding: utf-8 -*-
 u"""Active Caster model"""
 
@@ -38,7 +36,7 @@ from tmc_timeopt.trajectory import Trajectory
 
 
 class ActiveCasterKinematicsTarget(Target):
-    u"""ActiveCasterkinematixStarget class.
+    u"""ActiveCasterKinematicsTarget class.
 
     Output variable name:
       - caster
@@ -51,17 +49,17 @@ class ActiveCasterKinematicsTarget(Target):
                       'wheel_radius': 0.04}
 
     def __init__(self, param={}):
-        u"""Set the parameter and initialize Active Caster.
+        u"""Initialize Active Caster by setting parameters.
 
         Args:
-           Param: DICT with the following three elements
-                  Caster_offset: Offset between the center axis and wheel axis [m]
-                  Tread_length: Tred [M]
-                  Wheel_raduis: Wheel diameter [m]
+           param: dict with the following 3 elements
+                  caster_offset: offset [m] between the central axis and the wheel axis
+                  tread_length: tread [m]
+                  wheel_radius: wheel diameter [m]
         Note:
            Regarding variable names
-           [x, y, a]: Each represents the rotation of X coordinates, Y coordinates, Z axes
-           [0,1,2]: Each represents world coordinates, bogie coordinates, top plate coordinates
+           [x,y,a]: Represent x-coordinate, y-coordinate, rotation around the z-axis respectively
+           [0,1,2]: Represent world coordinates, cart coordinates, top board coordinates respectively
         """
         self.ac_names = ['x02', 'y02', 'a02', 'x01', 'y01', 'a01',
                          'a12', 'x11', 'caster', 'left_wheel', 'right_wheel']
@@ -84,42 +82,42 @@ class ActiveCasterKinematicsTarget(Target):
             self.r = self._DEFAULT_PARAM['wheel_radius']
 
     def update_kinematics(self, point):
-        u"""Update TARGET athletic.
+        u"""Update the target's kinematics.
 
         Args:
-           Point: DICT of each state
+           point: dict for each state quantity
         Note:
            Regarding variable names
-           [x, y, a]: Each represents the rotation of X coordinates, Y coordinates, Z axes
-           [0,1,2]: Each represents world coordinates, bogie coordinates, top plate coordinates
-           [D, v, a]: Express displacement, speed, acceleration, respectively
+           [x,y,a]: Represent x-coordinate, y-coordinate, rotation around the z-axis respectively
+           [0,1,2]: Represent world coordinates, cart coordinates, top board coordinates respectively
+           [d,v,a]: Represent displacement, velocity, acceleration respectively
         """
-        # Calculate the position and posture of the bogie
+        # Calculate the position and orientation of the cart
         (xd02, xv02, xa02) = (point['x02'][i] for i in range(3))
         (yd02, yv02, ya02) = (point['y02'][i] for i in range(3))
         (ad02, av02, aa02) = (point['a02'][i] for i in range(3))
         ad12 = point['a12'][0]
-        # Calculation of bogie displacement
+        # Calculate the displacement of the cart
         ad01 = ad02 - ad12
-        # Speed ​​calculation
+        # Calculate the velocity
         av01 = (yv02 * cos(ad01) - xv02 * sin(ad01)) / self.xd12
         xv01 = xv02 + self.xd12 * av01 * sin(ad01)
         yv01 = yv02 - self.xd12 * av01 * cos(ad01)
         av12 = av02 - av01
-        # Acceleration calculation
+        # Calculate the acceleration
         xa01 = (xa02 + (2.0 * av01 * yv02 + xa02) * cos(2.0 * ad01)
                 + (ya02 - 2.0 * av01 * xv02) * sin(2.0 * ad01)) / 2.0
         ya01 = (ya02 + (2.0 * av01 * xv02 - ya02) * cos(2 * ad01) + (xa02 + 2.0 * av01 * yv02) * sin(2 * ad01)) / 2.0
         aa01 = ((ya02 - av01 * xv02) * cos(ad01) - (xa02 + av01 * yv02) * sin(ad01)) / self.xd12
         aa12 = aa02 - aa01
-        # Calculation of bogie parallel speed
+        # Calculate the translational velocity of the cart
         if abs(cos(ad01)) > 0.5:
             xv11 = xv01 / cos(ad01)
             xa11 = xa01 / cos(ad01) + (xv01 * sin(ad01) * av01 / (cos(ad01) ** 2.0))
         else:
             xv11 = yv01 / sin(ad01)
             xa11 = ya01 / sin(ad01) - (yv01 * cos(ad01) * av01 / (sin(ad01) ** 2.0))
-        # Save the wheel speed orbital from the bogie speed orbit
+        # Save the wheel speed trajectory from the cart speed trajectory
         wl = (2.0 * xv11 - av01 * self.d) / self.r / 2.0
         wr = (2.0 * xv11 + av01 * self.d) / self.r / 2.0
         dwl = (2.0 * xa11 - aa01 * self.d) / self.r / 2.0
@@ -129,14 +127,14 @@ class ActiveCasterKinematicsTarget(Target):
         point['left_wheel'] = [0.0, wl, dwl]
         point['right_wheel'] = [0.0, wr, dwr]
         point['caster'] = [ad12, av12, aa12]
-        # Update DICT of state
+        # Update the dict for state quantities
         self.point = point
 
     def get_dynamics(self):
-        u"""Return the dynamic spalameter (A, B, C, D).
+        u"""Return dynamics parameters (a,b,c,d).
 
         Args:
-            (a, b, c, d), each is a dict with ('variable name', 'restriction type'), respectively, and the value is Value.
+            (a,b,c,d) are dicts with ('variable name', 'type of constraint') as keys and values as values.
         """
         (a, b, c, d) = ({}, {}, {}, {})
         a['left_wheel', 'acceleration'] = self.point['left_wheel'][1]
@@ -155,14 +153,14 @@ class ActiveCasterKinematicsTarget(Target):
         return (a, b, c, d)
 
     def generate_base_trajectory(self, traj, caster_angle, step):
-        u"""Calculate and add the orbit of the casta shaft angle from the car body command orbital ('oDOM_X', 'oDOM_Y', 'oDOM_T').
+        u"""Calculate and add the trajectory 'a12' of the caster axis angle from the command trajectory ('odom_x','odom_y','odom_t') of the vehicle body.
 
         Args:
-            Traj: TrajectoryDict
-            Caster_angle: Initial angle of Caster [RAD]
-            STEP: Division of parameters
+            traj: command trajectory (TrajectoryDict)
+            caster_angle: initial angle of caster [rad]
+            step: division width of parameters
         """
-        # Organization generation
+        # Generate the trajectory
         traj['x01'] = Trajectory(traj.length)
         traj['y01'] = Trajectory(traj.length)
         traj['a01'] = Trajectory(traj.length)
@@ -170,13 +168,13 @@ class ActiveCasterKinematicsTarget(Target):
         traj['a12'] = LinearTrajectory(traj.length)
         traj['left_wheel'] = Trajectory(traj.length)
         traj['right_wheel'] = Trajectory(traj.length)
-        # Define an alias for ease of internal processing
+        # Define aliases for easier internal processing
         traj['x02'] = traj['odom_x']
         traj['y02'] = traj['odom_y']
         traj['a02'] = traj['odom_t']
         traj['caster'] = LinearTrajectory(traj.length)
 
-        # Save the trajectory of the caster axis by integrating from the initial value
+        # Integrate from the initial value to save the trajectory of the caster axis
         traj['a01'][0] = (traj['a02'](0)[0] - caster_angle, 0, 0)
         size = int((traj.length - 1) / step)
         for i in range(size + 1):
@@ -199,7 +197,7 @@ class ActiveCasterKinematicsTarget(Target):
             yv01 = yv02 - self.xd12 * av01 * cos(ad01)
             ya01 = (ya02 + (2 * av01 * xv02 - ya02) * cos(2 * ad01) + (xa02 + 2 * av01 * yv02) * sin(2 * ad01)) / 2
             traj['y01'][s] = (yd01, yv01, ya01)
-            # Calculation of bogie parallel speed
+            # Calculate the translational velocity of the cart
             if abs(cos(ad01)) > 0.5:
                 xv11 = xv01 / cos(ad01)
                 xa11 = xa01 / cos(ad01) + (xv01 * sin(ad01) * av01 / (cos(ad01) ** 2))
@@ -207,14 +205,14 @@ class ActiveCasterKinematicsTarget(Target):
                 xv11 = yv01 / sin(ad01)
                 xa11 = ya01 / sin(ad01) - (yv01 * cos(ad01) * av01 / (sin(ad01) ** 2))
             traj['x11'][s] = (0, xv11, 0)
-            # Save the wheel speed orbital from the bogie speed orbit
+            # Save the wheel speed trajectory from the cart speed trajectory
             wl = (2 * xv11 - av01 * self.d) / self.r / 2
             wr = (2 * xv11 + av01 * self.d) / self.r / 2
             dwl = (2 * xa11 - aa01 * self.d) / self.r / 2
             dwr = (2 * xa11 + aa01 * self.d) / self.r / 2
             traj['left_wheel'][s] = (0, wl, dwl)
             traj['right_wheel'][s] = (0, wr, dwr)
-            # Call integral of the bogie
+            # Integrate the angle of the cart
             if i != size:
                 ad01 += av01 * step + 0.5 * aa01 * step ** 2
                 traj['a01'][step * (i + 1)] = (ad01, av01, aa01)
@@ -222,7 +220,7 @@ class ActiveCasterKinematicsTarget(Target):
     def plot_trajectory(self, traj, step=0.01):
         import matplotlib
         import matplotlib.pyplot as plt
-        # Change AGG to TKAGG when Debug
+        # Change Agg to tkAgg for debugging
         matplotlib.use('Agg')
 
         names = ['x02', 'y02', 'a02', 'x01', 'y01', 'a01',

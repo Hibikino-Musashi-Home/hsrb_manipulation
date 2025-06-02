@@ -25,7 +25,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGE.
 */
-/// @brief Class that performs a two -way golden split linear search method
+/// @brief Class for performing bidirectional golden-section line search method
 #ifndef HSRB_ANALYTIC_IK_BI_GOLDEN_SECTION_LINE_SEARCH_HPP_
 #define HSRB_ANALYTIC_IK_BI_GOLDEN_SECTION_LINE_SEARCH_HPP_
 
@@ -36,7 +36,7 @@ DAMAGE.
 namespace opt {
 
 /**
- * This is a class that performs a two -way golden split linear search method.
+ * This is a class for performing bidirectional golden-section line search method.
  */
 class BiGoldenSectionLineSearch {
  public:
@@ -53,15 +53,15 @@ class BiGoldenSectionLineSearch {
   }
 
   /**
-   * Explore within the section (-∞,+∞).
+   * Search is performed in the interval (-∞,+∞).
    *
-   * @param f one variable function
-   * The initial value of the @param STEP search section [-Step, STEP]
+   * @param	f		Single-variable function
+   * @param	step	Initial value of the search interval [-step, step]
    * @return
    */
   template<class Function1>
   OptResult Search(Function1& f, double step) {
-    // Do a single -directional search in the positive direction.
+    // Perform unidirectional search in the positive direction.
     {
       UniGoldenSectionLineSearch search(max_iteration_, epsilon_);
       OptResult result = search.Search(f, step);
@@ -69,10 +69,10 @@ class BiGoldenSectionLineSearch {
       // If the search fails
       if (result == OptFail) {
         result_ = OptFail;
-        // Continue searching in the negative direction.
+        // Continue search in the negative direction.
       } else {
-        // If you succeed in searching or reach the maximum number of repetitions
-        // Record a solution and compare it with the negative search results.
+        // If the search succeeds, or if the maximum number of iterations is reached
+        // Record the solution and compare it with the negative direction search result.
         result_ = result;
         iteration_ = search.iteration();
         solution_ = search.solution();
@@ -80,25 +80,25 @@ class BiGoldenSectionLineSearch {
       }
     }
 
-    // Do a single direction in the negative direction.
+    // Perform unidirectional search in the negative direction.
     {
-      // Create an inverted function.
+      // Create a reverse function.
       ReverseAdapterFunction1<Function1> revserseFunc(f);
 
       UniGoldenSectionLineSearch search(max_iteration_, epsilon_);
       OptResult result = search.Search(revserseFunc, step);
 
-      // If the search fails, return the positive direction.
+      // If the search fails, return the result in the positive direction.
       if (result == OptFail) {
         return result_;
       } else {
-        // If you succeed in searching or reach the maximum number of repetitions
-        // Failure or successful in the orientation,
-        // If the negative direction is better, it will be the final solution.
+        // If the search succeeds, or if the maximum number of iterations is reached
+        // If the positive direction failed, or if the positive direction succeeded but
+        // the negative direction has a better result, use it as the final solution.
         if ((result_ == OptFail) || (search.value() < value_)) {
           result_ = result;
           iteration_ = search.iteration();
-          solution_ = -search.solution(); // Please note that it is negative
+          solution_ = -search.solution();  // Be careful of the negative sign
           value_ = search.value();
         }
         return result_;
@@ -107,42 +107,42 @@ class BiGoldenSectionLineSearch {
   }
 
   /**
-   * Set the maximum repetition number.
+   * Set the maximum number of iterations.
    */
   void set_max_iteration(int max_iteration) {
     max_iteration_ = max_iteration;
   }
 
   /**
-   * Set the convergence conditions.
+   * Set convergence criteria.
    */
   void set_epsilon(double epsilon) {
     epsilon_ = epsilon;
   }
 
   /**
-   * Get the search results.
+   * Retrieve the search result.
    */
   OptResult result() const {
     return result_;
   }
 
   /**
-   * Acquires the repeated number of exploration.
+   * Retrieve the number of iterations taken by the search.
    */
   int iteration() const {
     return iteration_;
   }
 
   /**
-   * Acquires the solution after the search.
+   * Retrieve the solution after the search.
    */
   double solution() const {
     return solution_;
   }
 
   /**
-   * Get the target function value after search.
+   * Retrieve the objective function value after search.
    */
   double value() const {
     return value_;
@@ -152,33 +152,33 @@ class BiGoldenSectionLineSearch {
   OPT_CLASS_UNCOPYABLE(BiGoldenSectionLineSearch)
 
   /**
-   * Maximum number of repeats
+   * Maximum number of iterations
    */
   int max_iteration_;
 
   /**
-   * Convergence conditions
-   * (If the width of the uncertain section is below this value, it shall be converged).
+   * Convergence criteria
+   * (Convergence is considered when the width of the uncertain interval becomes less than this value)
    */
   double epsilon_;
 
   /**
-   * Holds search results.
+   * Hold the search result.
    */
   OptResult result_;
 
   /**
-   * Holds the repeated number of repetitions.
+   * Hold the number of iterations taken by the search.
    */
   int iteration_;
 
   /**
-   * Holds the solution after search.
+   * Hold the solution after the search.
    */
   double solution_;
 
   /**
-   * Holds the purpose function value of the solution.
+   * Hold the objective function value of the solution.
    */
   double value_;
 };

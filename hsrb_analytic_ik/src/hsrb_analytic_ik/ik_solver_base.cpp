@@ -58,23 +58,23 @@ BasePositionRange::BasePositionRange(const RobotParameter& robot_param, const Ei
   request.py = origin_to_hand(1, 3);
   request.pz = origin_to_hand(2, 3);
 
-  // Z coordinates at the intersection of arm_roll, Wrist_flex, Wrist_roll
+  // z-coordinate of the intersection of arm_roll, wrist_flex, and wrist_roll
   const double zwo = request.R31 * robot_param.L81 - request.R33 * robot_param.L82 + request.pz;
   if (zwo > robot_param.t3_max + robot_param.L3 + robot_param.L52) {
-    // It's too expensive to reach, no solution
+    // Too high to reach, no solution
     radius_min = -1.0;
     radius_max = -1.0;
     return;
   } else if (zwo < (robot_param.t3_min + robot_param.L3 + robot_param.L52 * std::cos(robot_param.t4_min) +
                     robot_param.L51 * std::sin(robot_param.t4_min))) {
-    // It's too low to reach, no solution
+    // Too low to reach, no solution
     radius_min = -1.0;
     radius_max = -1.0;
     return;
   }
 
-  // X, Y coordinates at the intersection of arm_roll, Wrist_flex, Wrist_roll
-  // This point, which is uniquely determined from Origin_to_hand, is a rotating center of the bogie
+  // x, y coordinates of the intersection of arm_roll, wrist_flex, and wrist_roll
+  // This point uniquely determined from origin_to_hand is the rotation center of the cart position
   center[0] = request.R11 * robot_param.L81 - request.R13 * robot_param.L82 + request.px;
   center[1] = request.R21 * robot_param.L81 - request.R23 * robot_param.L82 + request.py;
 
@@ -82,21 +82,21 @@ BasePositionRange::BasePositionRange(const RobotParameter& robot_param, const Ei
   const double alpha_t4 = std::atan2(robot_param.L52, robot_param.L51);
 
   if (zwo < robot_param.t3_min + robot_param.L3) {
-    // It will not reach unless you extend downward
+    // Cannot reach unless extended downward
     const double t4 = std::asin((zwo - robot_param.t3_min - robot_param.L3) / l5_length) - alpha_t4;
     const double S4 = std::sin(t4);
     const double C4 = std::cos(t4);
     radius_max = std::sqrt(std::pow(robot_param.L52 * S4 - robot_param.L51 * C4 - robot_param.L41, 2.0) +
                            robot_param.L42 * robot_param.L42);
   } else if (zwo > robot_param.t3_max + robot_param.L3) {
-    // It will not reach unless you extend upward
+    // Cannot reach unless extended upward
     const double t4 = std::asin((zwo - robot_param.t3_max - robot_param.L3) / l5_length) - alpha_t4;
     const double S4 = std::sin(t4);
     const double C4 = std::cos(t4);
     radius_max = std::sqrt(std::pow(robot_param.L52 * S4 - robot_param.L51 * C4 - robot_param.L41, 2.0) +
                            robot_param.L42 * robot_param.L42);
   } else {
-    // It will arrive if you stretch straight
+    // Can reach if extended straight
     const double S4 = std::sin(-alpha_t4);
     const double C4 = std::cos(-alpha_t4);
     radius_max = std::sqrt(std::pow(robot_param.L52 * S4 - robot_param.L51 * C4 - robot_param.L41, 2.0) +
@@ -105,18 +105,18 @@ BasePositionRange::BasePositionRange(const RobotParameter& robot_param, const Ei
 
   const double t4_min_rev = -robot_param.t4_min - alpha_t4;
   if (zwo >= robot_param.t3_min + robot_param.L3 + robot_param.L52) {
-    // Even if your arm is folded, it is OK in height
+    // OK in terms of height even when the arm is folded
     radius_min = std::sqrt(std::pow(-robot_param.L51 - robot_param.L41, 2.0) + robot_param.L42 * robot_param.L42);
   } else if (zwo > (robot_param.t3_min + robot_param.L3 + robot_param.L52 * std::cos(t4_min_rev) +
                     robot_param.L51 * std::sin(t4_min_rev))) {
-    // The attitude of lowering the lifting axis and putting your hands forward is the closest to your body
+    // Lower the elevating axis, and the posture of extending the hand forward is closest to the body
     const double t4 = std::asin((zwo - robot_param.t3_min - robot_param.L3) / l5_length) - alpha_t4;
     const double S4 = std::sin(t4);
     const double C4 = std::cos(t4);
     radius_min = std::sqrt(std::pow(robot_param.L52 * S4 - robot_param.L51 * C4 - robot_param.L41, 2.0) +
                            robot_param.L42 * robot_param.L42);
   } else {
-    // The attitude of lowering the arm to the limit is the closest
+    // The posture of lowering the arm to the limit is the closest
     const double S4 = std::sin(robot_param.t4_min);
     const double C4 = std::cos(robot_param.t4_min);
     radius_min = std::sqrt(std::pow(robot_param.L52 * S4 - robot_param.L51 * C4 - robot_param.L41, 2.0) +
@@ -131,17 +131,17 @@ HybridIKSolverBase::HybridIKSolverBase(tmc_robot_kinematics_model::IKSolver::Ptr
                                        const RobotParameter& robot_param)
     : IKSolver(successor), robot_param_(robot_param) {}
 
-// Solve IK, but also allow BASE movement
+// Solve IK, but allow base movement
 tmc_robot_kinematics_model::IKResult HybridIKSolverBase::Solve(
     const tmc_robot_kinematics_model::IKRequest& request,
     std::function<bool()>& interrupt,
     tmc_manipulation_types::JointState& solution_angle_out,
     Eigen::Affine3d& origin_to_base_out,
     Eigen::Affine3d& origin_to_end_out) {
-  // Use Hybridik only under the following conditions
-  // 1. BasemovementType is KPlanar
-  // 2. use_jointsが arm_lift_joint, arm_flex_joint, arm_roll_joint, wrist_flex_joint, wrist_roll_joint(順不同)
-  // 3. frame_nameがhand_palm_link or hand_palm_joint
+  // Use HybridIK only under the following conditions
+  // 1. BaseMovementType is kPlanar
+  // 2. use_joints are arm_lift_joint, arm_flex_joint, arm_roll_joint, wrist_flex_joint, wrist_roll_joint (in no particular order)
+  // 3. frame_name is hand_palm_link or hand_palm_joint
   if (!SuitBaseMovement(request) ||
       !SuitUseJoint(request) ||
       !SuitFrame(request)) {
@@ -175,7 +175,7 @@ BaseYawIKSolver::BaseYawIKSolver(tmc_robot_kinematics_model::IKSolver::Ptr succe
                                        const RobotParameter& robot_param)
     : IKSolver(successor), robot_param_(robot_param) {}
 
-// Solve IK, but also allow BASE movement
+// Solve IK, but allow base movement
 tmc_robot_kinematics_model::IKResult BaseYawIKSolver::Solve(
     const tmc_robot_kinematics_model::IKRequest& request,
     std::function<bool()>& interrupt,
@@ -199,7 +199,10 @@ tmc_robot_kinematics_model::IKResult BaseYawIKSolver::Solve(
     const tmc_robot_kinematics_model::IKRequest& request,
     std::function<bool()>& interrupt,
     std::vector<tmc_robot_kinematics_model::IKResponse>& responses_out) {
-  // Use Baseyawik only under the following conditions
+  // Use BaseYawIK only under the following conditions
+  // 1. BaseMovementType is kRotationZ
+  // 2. use_joints are arm_lift_joint, arm_flex_joint, arm_roll_joint, wrist_flex_joint, wrist_roll_joint (in no particular order)
+  // 3. frame_name is hand_palm_link or hand_palm_joint
   if (!SuitBaseRotationZ(request) ||
       !SuitUseJoint(request) ||
       !SuitFrame(request)) {

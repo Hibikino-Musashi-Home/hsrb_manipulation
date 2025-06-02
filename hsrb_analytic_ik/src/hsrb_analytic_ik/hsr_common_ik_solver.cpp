@@ -25,7 +25,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGE.
 */
-/// @brief High-speed IK for HSR-B
+/// @brief Fast IK for HSR-B
 
 #include "hsr_common_ik_solver.hpp"
 
@@ -44,7 +44,7 @@ Eigen::Vector3d ConvertPose2d(const Eigen::Affine3d& pose) {
 
 namespace hsrb_analytic_ik {
 
-/// Check if Basemovement is a parallel of x, y and Z
+/// Check if BaseMovement is x, y translation and z rotation
 bool SuitBaseMovement(const tmc_robot_kinematics_model::IKRequest& request) {
   if (request.linear_base_movements.size() != 2) {
     return false;
@@ -64,7 +64,7 @@ bool SuitBaseMovement(const tmc_robot_kinematics_model::IKRequest& request) {
   return true;
 }
 
-/// Check if Basemovement is the rotation of Z
+/// Check if BaseMovement is z rotation
 bool SuitBaseRotationZ(const tmc_robot_kinematics_model::IKRequest& request) {
   if (request.linear_base_movements.size() != 0) {
     return false;
@@ -78,7 +78,7 @@ bool SuitBaseRotationZ(const tmc_robot_kinematics_model::IKRequest& request) {
   return true;
 }
 
-/// Check if Joint contains all the axes of the arm
+/// Check if Joint includes all arm axes
 bool SuitUseJoint(const tmc_robot_kinematics_model::IKRequest& request) {
   std::string arm_joints[] =
       {"arm_lift_joint", "arm_flex_joint", "arm_roll_joint", "wrist_flex_joint", "wrist_roll_joint"};
@@ -93,13 +93,13 @@ bool SuitUseJoint(const tmc_robot_kinematics_model::IKRequest& request) {
   return true;
 }
 
-/// Check if Frame_name is Hand_palm_link
+/// Check if frame_name is hand_palm_link
 bool SuitFrame(const tmc_robot_kinematics_model::IKRequest& request) {
   return ((request.frame_name == "hand_palm_link") ||
           (request.frame_name == "hand_palm_joint"));
 }
 
-/// Make a joint name and ID map
+/// Create a map of joint names and IDs
 bool MapJointAndId(const std::vector<std::string>& use_joints,
                    std::map<std::string, uint32_t>& map_out) {
   std::string arm_joints[] =
@@ -117,7 +117,7 @@ bool MapJointAndId(const std::vector<std::string>& use_joints,
   return true;
 }
 
-/// Output Joint_names values ​​from Joint_state.If not found, return default_pos.
+/// Output the value of joint_names from joint_state. If not found, return default_pos.
 double ExtractJointPosition(
     const tmc_manipulation_types::JointState& joint_state,
     const std::string& joint_name,
@@ -133,7 +133,15 @@ double ExtractJointPosition(
   return default_pos;
 }
 
-/// Solve IK, but also allow BASE movement
+/// Solve IK allowing base movement
+/// @param [IN] request IK input
+/// @param [OUT] solution_angle_out Arm solution
+/// @param [OUT] origin_to_base_out Robot position/orientation of solution
+/// @param [OUT] origin_to_end_out Solution orientation
+/// @retval kSuccess Success
+/// @retval kConverge Converged to a non-solution
+/// @retval kMaxItr Reached maximum number of iterations
+/// @retval kFail Failure. No solution.
 tmc_robot_kinematics_model::IKResult SolveIK(
     const tmc_robot_kinematics_model::IKRequest& request,
     const RobotParameter& function_param,
@@ -146,7 +154,7 @@ tmc_robot_kinematics_model::IKResult SolveIK(
 
   solution_angle_out.name = request.use_joints;
   solution_angle_out.position.resize(request.use_joints.size());
-  // Copy Initial for joint angles outside the chain
+  // Copy initial joint angles for joints outside the chain
   for (uint32_t i = 0; i < request.use_joints.size(); ++i) {
     solution_angle_out.position[i] =
         ExtractJointPosition(request.initial_angle,
@@ -156,9 +164,9 @@ tmc_robot_kinematics_model::IKResult SolveIK(
   origin_to_base_out = Eigen::Affine3d::Identity();
   origin_to_end_out = Eigen::Affine3d::Identity();
 
-  // Copy the input.
+  // Copy input.
   opt::RobotFunction2Request function_req;
-  // Set the reference value (T_ref) in the simultaneous conversion matrix.
+  // Set the reference value of simultaneous transformation matrix (T_ref).
   function_req.R11 = request.ref_origin_to_end(0, 0);
   function_req.R21 = request.ref_origin_to_end(1, 0);
   function_req.R31 = request.ref_origin_to_end(2, 0);
@@ -175,7 +183,7 @@ tmc_robot_kinematics_model::IKResult SolveIK(
   function_req.py = request.ref_origin_to_end(1, 3);
   function_req.pz = request.ref_origin_to_end(2, 3);
 
-  // Set the diagonal component W_i (i = 0..7) in the weight matrix (diagonal matrix).
+  // Set diagonal elements w_i (i=0..7) of the weight matrix (diagonal matrix).
   function_req.w0 = request.weight(request.use_joints.size());
   function_req.w1 = request.weight(request.use_joints.size() + 1);
   function_req.w2 = request.weight(request.use_joints.size() + 2);
@@ -185,7 +193,7 @@ tmc_robot_kinematics_model::IKResult SolveIK(
   function_req.w6 = request.weight(joint_map["wrist_flex_joint"]);
   function_req.w7 = request.weight(joint_map["wrist_roll_joint"]);
 
-  // Set the reference value of the parameter θ^ref_i (i = 0..7).
+  // Set the reference value of parameter θ^ref_i (i=0..7).
   function_req.r0 = request.origin_to_base(0, 3);
   function_req.r1 = request.origin_to_base(1, 3);
   function_req.r2 = std::atan2(request.origin_to_base(1, 0), request.origin_to_base(0, 0));
@@ -195,28 +203,28 @@ tmc_robot_kinematics_model::IKResult SolveIK(
   function_req.r6 = ExtractJointPosition(request.initial_angle, "wrist_flex_joint", 0.0);
   function_req.r7 = ExtractJointPosition(request.initial_angle, "wrist_roll_joint", 0.0);
 
-  // Create an optimization purpose function.
+  // Create the objective function for optimization.
   opt::RobotFunction2 f(function_req, function_param);
 
   // Execute optimization.
   opt::OptResult result = opt::RobotOptimizer::Optimize(f);
 
-  // If the optimization fails for some reason, it will be unusual.
+  // If optimization fails for any reason, consider it as no solution.
   // (Depending on the optimization method used, OptFail may not be returned.)
   if (result == opt::OptFail) {
     return tmc_robot_kinematics_model::kFail;
   }
 
-  // Optimization is treated as a successful one, even in the maximum repetition.
+  // Treat optimization as successful even if it reaches the maximum iteration count.
   if (result == opt::OptMaxItor) {
     // return kMaxItr;
   }
 
-  // If the optimal solution is outside the executable area, if the degree of outing is small,
-  // It is forcibly pulled back to the executable area and solved, and treated as a successful optimization.
-  // In cases where the executable area is on a straight line, it is not expected that it will converge to the inner point due to the calculation error, so
-  // This process is required.
-  // There is such a case in the test driver Limittest.
+  // If the optimal solution is outside the feasible region, but only slightly,
+  // Force it back into the feasible region and treat as the solution, considering optimization successful.
+  // In cases where the feasible region is on a straight line, computation errors are unlikely to converge to an interior point, so
+  // This handling is needed.
+  // Test driver LimitTest has cases like this.
   double outerGrade = f.GetOuterGrade();
   if (outerGrade > 0) {
     if (outerGrade <= 1e-6) {
@@ -226,17 +234,17 @@ tmc_robot_kinematics_model::IKResult SolveIK(
     }
   }
 
-  // Copy the output.
+  // Copy output.
   opt::RobotFunction2Response function_res(f.response());
 
-  // Create Solution_angle_out.position.
+  // Create solution_angle_out.position.
   solution_angle_out.position(joint_map["arm_lift_joint"]) = function_res.t3;
   solution_angle_out.position(joint_map["arm_flex_joint"]) = function_res.t4;
   solution_angle_out.position(joint_map["arm_roll_joint"]) = function_res.t5;
   solution_angle_out.position(joint_map["wrist_flex_joint"]) = function_res.t6;
   solution_angle_out.position(joint_map["wrist_roll_joint"]) = function_res.t7;
 
-  // Create a simultaneous conversion matrix between links corresponding to parameter θ_i.
+  // Create the simultaneous transformation matrices between links corresponding to parameter θ_i.
   Eigen::Translation3d   T0 = Eigen::Translation3d(function_res.t0, 0, 0);
   Eigen::Translation3d   T1 = Eigen::Translation3d(0, function_res.t1, 0);
   Eigen::AngleAxisd      T2 = Eigen::AngleAxisd(function_res.t2, Eigen::Vector3d(0, 0, 1));
@@ -250,14 +258,14 @@ tmc_robot_kinematics_model::IKResult SolveIK(
   Eigen::Affine3d        T8 = Eigen::Translation3d(function_param.L81, 0, function_param.L82)
                             * Eigen::AngleAxisd(M_PI, Eigen::Vector3d(0, 0, 1));
 
-  // Create Origin_to_base_out, Origin_to_end_out.
+  // Create origin_to_base_out, origin_to_end_out.
   origin_to_base_out = T0 * T1 * T2;
   origin_to_end_out = origin_to_base_out * T3 * T4 * T5 * T6 * T7 * T8;
 
   return tmc_robot_kinematics_model::kSuccess;
 }
 
-// The input can take the expression of -2π ~ 2π, but the expression of the joint angle is changed to -π ~ π Created to use it for the wheel fixing 6-axis IK.
+// Input can take representations from -2π to 2π, change representation method of joint angles to -π to π; created for use in wheel-fixed 6-axis IK T.Yamamamoto
 double ThetaReperesentationChange(const double theta) {
   if (theta > M_PI) {
     return (-2*M_PI + theta);
@@ -267,29 +275,31 @@ double ThetaReperesentationChange(const double theta) {
   return theta;
 }
 
-// A function that solves the equation of a triangular function synthesis ASINθ+bcosθ = c d = √ (a^2+b^2) There is a 2O attached letter, but it is meaningless.
-// Created to use it for wheel fixed 6 -axis IK T.Yamamoto
+// Function to solve the equation of trigonometric synthesis AsinΘ＋BcosΘ＝C, D＝√（A^2+B^2) although there is an arbitrary subscript 2o with no meaning.
+// Created for use in wheel-fixed 6-axis IK T.Yamamamoto
 bool TrigonometricCompositionFormula(const double A2o, const double B2o, const double C2o, const double D2o,
                                      double& theta21, double& theta22) {
-  if (fabs(C2o) > D2o) {
-    return false;
+  if (fabs(C2o) > D2o) {   // To solve asin it must be｜C2o/D2o｜<=1
+    return false;  // Cannot solve asin
   }
-  const double alpha2o = atan2(B2o, A2o);
-  const double AS1 = asin(C2o/D2o);
+  const double alpha2o = atan2(B2o, A2o);   // Solve for offset phase α of composite function
+  const double AS1 = asin(C2o/D2o);    // Solution of composite trigonometric function equation asin
   double AS2;
+  // AS1 is only -pi/2 to pi/2, yet it doesn't stop; also there's another solution. When solution a is positive, pi-a is a solution when negative -pi-a is also a solution.
   if (AS1 >= 0) {
-    AS2 = M_PI - AS1;
+    AS2 = M_PI-AS1;
   } else {
-    AS2 = -M_PI - AS1;
+    AS2 = -M_PI-AS1;
   }
+  // When exceeding pi, make it a negative rotation not exceeding -pi, vice versa. Keep both solutions theta21 theta22 between -pi and pi.
   theta21 = ThetaReperesentationChange(AS1-alpha2o);
   theta22 = ThetaReperesentationChange(AS2-alpha2o);
-  return true;
+  return true;  // Can solve asin
 }
 
 
-// Use only in judgethetapi_pi.
-// Created to use it for wheel fixed 6 -axis IK T.Yamamoto
+// Only used within JudgeThetaPi_Pi, even if slightly exceeding limits, adhere to limits.
+// Created for use in wheel-fixed 6-axis IK T.Yamamamoto
 void ThetaWithinLimit(const double max_in, const double min_in, const double epsilon, double& theta) {
   if (theta > max_in && theta <= (max_in + epsilon)) {
     theta = max_in;
@@ -299,9 +309,9 @@ void ThetaWithinLimit(const double max_in, const double min_in, const double eps
 }
 
 
-// Check the upper limit and lower limit of the joint angle, and if it is established, the maximum value or the maximum value is higher, or if the minimum value is smaller than -pi.
-// Change the joint angle (-pi to pi) required by IK to change the value beyond the range (because it does not pass by test)
-// Created to use it for wheel fixed 6 -axis IK T.Yamamoto
+// Check joint angle limits, if established TRUE; also if maximum exceeds PI or minimum is less than -PI then
+// Modify joint angle obtained by IK (-PI to PI) if exceeding range (to pass tests)
+// Created for use in wheel-fixed 6-axis IK T.Yamamamoto
 bool JudgeThetaPi_Pi(const double max_in, const double min_in, const double epsilon, double& theta) {
   const double max = max_in + epsilon;
   const double min = min_in - epsilon;
@@ -327,8 +337,8 @@ bool JudgeThetaPi_Pi(const double max_in, const double min_in, const double epsi
   return false;
 }
 
-// Wheel fixed 6 -axis IK 2022.8. T.yamamoto
-// Solve the IK on the arm (THETA3-7) + the bogie turning axis (THETA2)
+// Wheel-fixed 6-axis IK August 2022 T.Yamamamoto
+// Solve IK with arm (theta3-7) + platform rotation axis (theta2)
 tmc_robot_kinematics_model::IKResult SolveBaseYawIK(
     const tmc_robot_kinematics_model::IKRequest& request,
     const RobotParameter& function_param,
@@ -336,7 +346,7 @@ tmc_robot_kinematics_model::IKResult SolveBaseYawIK(
   std::map<std::string, uint32_t> joint_map;
   MapJointAndId(request.use_joints, joint_map);
 
-  // THETA0 THETA1 is not changed from the target value (fixed)
+  // theta0 theta1 remain unchanged target value (fixed)
   const double theta0 = request.origin_to_base(0, 3);
   const double theta1 = request.origin_to_base(1, 3);
 
@@ -350,16 +360,16 @@ tmc_robot_kinematics_model::IKResult SolveBaseYawIK(
   const double ywo = UB7o(1, 3);
   const double zwo = UB7o(2, 3);
 
-  // Introduction of the coefficient of triangular function synthesis.
+  // Solve for coefficients of trigonometric synthesis formula.
   const double A2o = -theta0+xwo;
   const double B2o = (theta1-ywo);
   const double C2o = -function_param.L42;
   const double D2o = sqrt(pow(A2o, 2.0) + pow(B2o, 2.0));
 
-  // Solve the triangular function synthesis and find THETA2.Two solutions
+  // Solve trigonometric synthesis formula for theta2. Two solutions.
   double theta21, theta22;
-  const double eps_theta = 1e-3;  // A range that can be exceeded the upper and lower lower limit.Output as a joint lower or lower limit (T0 to T7)
-  std::vector<std::vector<double>> theta01234;  // The first argument is a solution number 0,1,2,3 (maximum 4) The second argument is THETA0-4
+  const double eps_theta = 1e-3;  // Range allowed beyond joint angle limits. Output as joint angle limits (t0～t7)
+  std::vector<std::vector<double>> theta01234;  // 1st argument is solution number 0,1,2,3(up to 4) 2nd argument is theta0-4
 
   if (TrigonometricCompositionFormula(A2o, B2o, C2o, D2o, theta21, theta22)) {
     const double A4o = -function_param.L52;
@@ -368,12 +378,12 @@ tmc_robot_kinematics_model::IKResult SolveBaseYawIK(
 
     for (auto theta2 : {theta21, theta22}) {
       const double C4o = (-cos(theta2)*(theta0-xwo)-sin(theta2)*(theta1-ywo)-function_param.L41);
-      // Find the solution of THETA4.Two for THETA2
+      // Solve for theta4. Two solutions for theta2.
       double theta41, theta42;
       if (TrigonometricCompositionFormula(A4o, B4o, C4o, D4o, theta41, theta42)) {
         for (auto theta4 : {theta41, theta42}) {
           if (JudgeThetaPi_Pi(function_param.t4_max, function_param.t4_min, eps_theta, theta4)) {
-            // Find THETA3.
+            // Find theta3.
             double theta3 = zwo-function_param.L3-function_param.L52*cos(theta4)-function_param.L51*sin(theta4);
             if (JudgeThetaPi_Pi(function_param.t3_max, function_param.t3_min, eps_theta, theta3)) {
               theta01234.push_back({theta0, theta1, theta2, theta3, theta4});
@@ -382,13 +392,14 @@ tmc_robot_kinematics_model::IKResult SolveBaseYawIK(
         }
       }
     }
-  }  // The end of the IF triangular function synthesis and finds THETA2
+  }  // END IF Solve trigonometric synthesis formula for theta2
 
-  if (theta01234.empty()) {  // 解が１つもなかったらfailで終了
+  if (theta01234.empty()) {  // If no solutions, end with fail
     return tmc_robot_kinematics_model::kFail;
   }
 
-  std::vector<std::vector<double>> theta_all;  // The first argument is the second argument of the IK solution is the joint number.
+  std::vector<std::vector<double>> theta_all;  // 1st argument is IK solution number 2nd argument is joint number
+
   for (const auto& theta_parts : theta01234) {
     double theta2o = theta_parts.at(2);
     double theta3o = theta_parts.at(3);
@@ -407,16 +418,16 @@ tmc_robot_kinematics_model::IKResult SolveBaseYawIK(
     UB4o = TBm1*Tm10*T01*T12*T23*T34;
     U47o = (UB4o.inverse())*UB7o;
 
-    // THETA6 2 is solved, so two solutions
+    // Solve theta6 squared, two solutions
     const double theta61 = atan2(-sqrt(pow(U47o(1, 0), 2.0)+pow(U47o(1, 1), 2.0)), U47o(1, 2));
     const double theta62 = atan2(sqrt(pow(U47o(1, 0), 2.0)+pow(U47o(1, 1), 2.0)), U47o(1, 2));
     for (auto theta6 : {theta61, theta62}) {
-      // When THETA6 is near 0, the hands are extended with a unique posture.It is good if theTa5+THETA7 is constant.
+      // When theta6 is close to 0, singular posture with fully extended end-effector. If theta5+theta7 is constant OK.
       if (fabs(theta6) < 1e-9) {
         const double theta57a = atan2(-U47o(0, 1), U47o(0, 0));
         const double theta57b = atan2(-U47o(2, 0), -U47o(2, 1));
         if (fabs(theta57a-theta57b) < 1e-6) {
-          const double theta5 = theta57a/2.0;  // simple calculation
+          const double theta5 = theta57a/2.0;   // Simple calculation
           const double theta7 = theta57a/2.0;
           theta_all.push_back({theta_parts.at(0), theta_parts.at(1), theta_parts.at(2), theta_parts.at(3),
                                theta_parts.at(4), theta5, theta6, theta7});
@@ -427,8 +438,8 @@ tmc_robot_kinematics_model::IKResult SolveBaseYawIK(
         continue;
       }
       int sign6;
-      // the hellen (the 1,1)=-sin6sin (thetata7)
-      // Therefore, the value of ATAN2 changes depending on the Sin (THETA6) code.Use Sign instead of sin to prevent 0 %
+      // U47o(1,1)=-sin(theta6)sin(theta7) U47(1,0)=sin(theta6)cos(theta7)
+      // atan2 value changes depending on sign of sin(theta6). Use sign instead of sin to prevent division by zero
       if (theta6 >= 0) {sign6 = 1.0;} else {sign6 = -1.0;}
       double theta7 = atan2(-U47o(1, 1)*sign6, U47o(1, 0)*sign6);
       if (!JudgeThetaPi_Pi(function_param.t7_max, function_param.t7_min, eps_theta, theta7)) {
@@ -443,7 +454,7 @@ tmc_robot_kinematics_model::IKResult SolveBaseYawIK(
     }  // for theta6
   }    // for i01234
 
-  if (theta_all.empty()) {  // 5,6,7 If there is no solution to 5,6,7
+  if (theta_all.empty()) {  // If no solutions for 5,6,7, end with fail
     return tmc_robot_kinematics_model::kFail;
   }
 
@@ -457,7 +468,7 @@ tmc_robot_kinematics_model::IKResult SolveBaseYawIK(
     const double t6 = joint_positions.at(6);
     const double t7 = joint_positions.at(7);
 
-    // Create Solution_angle.position.
+    // Create solution_angle.position.
     tmc_robot_kinematics_model::IKResponse response;
     response.solution_angle.name = request.use_joints;
     response.solution_angle.position.resize(request.use_joints.size());
@@ -467,7 +478,7 @@ tmc_robot_kinematics_model::IKResult SolveBaseYawIK(
     response.solution_angle.position(joint_map["wrist_flex_joint"]) = t6;
     response.solution_angle.position(joint_map["wrist_roll_joint"]) = t7;
 
-    // Create a simultaneous conversion matrix between links corresponding to parameter θ_i.
+    // Create simultaneous transformation matrices between links corresponding to parameter θ_i.
     Eigen::Translation3d   T0 = Eigen::Translation3d(t0, 0, 0);
     Eigen::Translation3d   T1 = Eigen::Translation3d(0, t1, 0);
     Eigen::AngleAxisd      T2 = Eigen::AngleAxisd(t2, Eigen::Vector3d(0, 0, 1));
@@ -482,7 +493,7 @@ tmc_robot_kinematics_model::IKResult SolveBaseYawIK(
     Eigen::Affine3d        T8 = Eigen::Translation3d(function_param.L81, 0, function_param.L82)
                               * Eigen::AngleAxisd(M_PI, Eigen::Vector3d(0, 0, 1));
 
-    // Create Origin_to_base, Origin_to_end.
+    // Create origin_to_base, origin_to_end.
     response.origin_to_base = T0 * T1 * T2;
     response.origin_to_end = response.origin_to_base * T3 * T4 * T5 * T6 * T7 * T8;
     responses_out.push_back(response);
@@ -493,7 +504,7 @@ tmc_robot_kinematics_model::IKResult SolveBaseYawIK(
 uint32_t SelectClosestSolution(
     const tmc_robot_kinematics_model::IKRequest& request,
     const std::vector<tmc_robot_kinematics_model::IKResponse>& responses) {
-  // The assumption that the joint order of Request.use_Joints and Responses matches, as in Solvebaseyawik solutions
+  // Assuming request.use_joints matches joint order in responses like solutions of SolveBaseYawIK
   Eigen::VectorXd current_arm_positions = Eigen::VectorXd::Zero(request.use_joints.size());
   for (auto i = 0; i < request.use_joints.size(); ++i) {
     current_arm_positions[i] = ExtractJointPosition(request.initial_angle, request.use_joints[i], 0.0);

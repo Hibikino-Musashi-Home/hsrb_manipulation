@@ -1,0 +1,25 @@
+<package format="3">
+  <name>hsrb_ik_solver_node</name>
+  <version>2.1.0</version>
+  <description>Ik solver node and plugin interfaces</description>
+
+  <maintainer email="xr-hsr-support@mail.toyota.co.jp">HSR Support</maintainer>
+
+  <license>BSD 3-clause Clear License</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>hsrb_analytic_ik</depend>
+  <depend>pluginlib</depend>
+  <depend>tmc_ik_solver_node</depend>
+
+  <build_depend>eigen</build_depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>tf2_eigen</test_depend>
+  <test_depend>tmc_manipulation_tests</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

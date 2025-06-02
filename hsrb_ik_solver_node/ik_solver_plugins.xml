@@ -1,0 +1,8 @@
+<library path="hsrb_ik_solver_node">
+  <class type="hsrb_ik_solver_node::HsrbIkSolverPluginRobustToBasePositionError" base_class_type="tmc_ik_solver_node::IIkSolverPlugin">
+    <description>This is an ik solver for hsr hsrb.</description>
+  </class>
+  <class type="hsrb_ik_solver_node::HsrcIkSolverPluginRobustToBasePositionError" base_class_type="tmc_ik_solver_node::IIkSolverPlugin">
+    <description>This is an ik solver for hsr hsrc.</description>
+  </class>
+</library>

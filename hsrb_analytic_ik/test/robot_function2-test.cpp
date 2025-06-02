@@ -25,17 +25,17 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGE.
 */
-/// @brief Test of purpose function for IK optimization
+/// @brief Test of objective function for IK optimization
 #include <gtest/gtest.h>
 
 #include "robot_function2.hpp"
 
 namespace opt {
 ////////////////////////////////////////////////////////////////////////////////
-//// Comparison test with calculation results by maxima
+//// Comparison test with calculation results from Maxima
 
 /*
- Test case 1 (when + is selected by calculation of θ_6)
+ Test case 1 (When + is chosen for θ_6 calculation)
 
  W = (0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
  θref = ( 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9)
@@ -58,9 +58,9 @@ namespace opt {
  py=0.5
  pz=0.7
 
- At the time
+ When,
 
- Parameter value:
+ Parameter values:
  θ0	0.208362584
  θ1	0.625109915
  θ3	0.325508315
@@ -68,10 +68,10 @@ namespace opt {
  θ5(+)	2.677089633
  θ7(+)	0.756052367
 
- Function value:
+ Function values:
  E(+)	2.197715882
 
- Divisional value:
+ Partial derivative values:
  θ1
  /∂θ2	0.052081718
  /∂θ4	-0.072902719
@@ -88,7 +88,7 @@ namespace opt {
  /∂θ2	-1.262854896
  /∂θ4	-0.649771413
 
- Slope value:
+ Gradient values:
  E(+)
  /∂θ2	1.463493993
  /∂θ4	1.372354674
@@ -138,20 +138,21 @@ TEST(RobotFunction2_Test, case1_t6_plus) {
   double epsilon = 1e-8;
 
   opt::RobotFunction2 f(function_req, hsrb_analytic_ik::RobotParameter());
-  f.set_penalty_type(RobotFunction2::PenaltyNone);
-  // Verify the function value.
+  f.set_penalty_type(RobotFunction2::PenaltyNone);  // No penalties applied.
+
+  // Verify function values.
   double value = f.Value(x);
   EXPECT_TRUE(f.t6_use_plus());
   EXPECT_NEAR(value_expected, value, epsilon);
 
-  // Verify the gradient.
+  // Verify gradients.
   Vector2 grad = f.Gradient(x);
   EXPECT_NEAR(grad1_expected, grad.v1, epsilon);
   EXPECT_NEAR(grad2_expected, grad.v2, epsilon);
 }
 
 /*
- Test case 4 (when the calculation of θ_6 is selected)
+ Test case 4 (When - is chosen for θ_6 calculation)
 
  W = (0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
  θref = ( -1.2, -1.3, -1.4, -1.5, -1.6, -1.7, -1.8, -1.9)
@@ -174,9 +175,9 @@ TEST(RobotFunction2_Test, case1_t6_plus) {
  py=0.5
  pz=0.7
 
- At the time
+ When,
 
- Parameter value:
+ Parameter values:
  θ0		0.43042695341123
  θ1		0.31314882530530
  θ3		0.56603461920606
@@ -184,10 +185,10 @@ TEST(RobotFunction2_Test, case1_t6_plus) {
  θ5(-)	4.051470388272410
  θ7(-)	0.948794949289840
 
- Function value:
+ Function values:
  E(-)	27.181523266162000
 
- Divisional value:
+ Partial derivative values:
  θ0
  /∂θ2	0.10743241921801
  /∂θ4	0.25159257378924
@@ -207,7 +208,7 @@ TEST(RobotFunction2_Test, case1_t6_plus) {
  /∂θ2	-0.33363621490161
  /∂θ4	-1.00395726436927
 
- Slope value:
+ Gradient values:
  E(-)
  /∂θ2	3.92440840017665
  /∂θ4	-9.43399316103728
@@ -258,24 +259,24 @@ TEST(RobotFunction2_Test, case3_t6_minus) {
   double epsilon = 1e-8;
 
   opt::RobotFunction2 f(function_req, hsrb_analytic_ik::RobotParameter());
-  f.set_penalty_type(RobotFunction2::PenaltyNone);
+  f.set_penalty_type(RobotFunction2::PenaltyNone);  // No penalties applied.
 
-  // Verify the function value.
+  // Verify function values.
   double value = f.Value(x);
   EXPECT_FALSE(f.t6_use_plus());
   EXPECT_NEAR(value_expected, value, epsilon);
 
-  // Verify the gradient.
+  // Verify gradients.
   Vector2 grad = f.Gradient(x);
   EXPECT_NEAR(grad1_expected, grad.v1, epsilon);
   EXPECT_NEAR(grad2_expected, grad.v2, epsilon);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//// Gettheta4Boundary function test
+//// Test of the GetTheta4Boundary function
 
 TEST(RobotFunction2_Test, GetTheta4Boundary_Test) {
-  // Set the parameters provided by the test driver RandomTest.
+  // Set the parameters provided by the test driver's RandomTest.
   opt::RobotFunction2Request function_req;
   function_req.r0 = -0.93168;
   function_req.r1 = 0.87079;
@@ -314,8 +315,8 @@ TEST(RobotFunction2_Test, GetTheta4Boundary_Test) {
   bool feasible_exists = f.GetTheta4Boundary(t4_lower, t4_upper);
   EXPECT_TRUE(feasible_exists);
 
-  // Make sure the value is visually consistent with the graph.
-  // It is better to write a test code compared to the value calculated separately.
+  // Check if the values visually match the graph.
+  // It's better to write test code to compare with separately calculated values.
 }
 
 }  // namespace opt

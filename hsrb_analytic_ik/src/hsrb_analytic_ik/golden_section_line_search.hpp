@@ -25,7 +25,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGE.
 */
-/// @brief Class to perform a golden split straight line search method
+/// @brief Class for executing the golden section line search method
 #ifndef HSRB_ANALYTIC_IK_GOLDEN_SECTION_LINE_SEARCH_HPP_
 #define HSRB_ANALYTIC_IK_GOLDEN_SECTION_LINE_SEARCH_HPP_
 
@@ -34,7 +34,7 @@ DAMAGE.
 namespace opt {
 
 /**
- * This is a class that performs a golden split linear search method.
+ * This class performs the golden section line search method.
  */
 class GoldenSectionLineSearch {
  public:
@@ -50,58 +50,58 @@ class GoldenSectionLineSearch {
         value_(0) {}
 
   /**
-   * Do the search.
+   * Performs the search.
    *
-   * If one variable function F is narrowly convex in the search section [a, b],
-   * Converge to extremely small by search.
+   * If the single variable function f is strictly convex in the search interval [a, b],
+   * it converges to the minimum value through the search.
    *
-   * If it is detected that it is not narrowly convex while searching, the search fails and returns OptFail.
-   * However, if it is not necessarily detected and is not detected, you will find a local solution.
+   * If non-strict convexity is detected during the search, the search fails and returns OptFail.
+   * However, failure may not always be detected, and in such cases, a local solution is obtained.
    *
-   * @param f one variable function
-   * @Param A Search section [a, b] lower limit value
-   * @Param B In search section [a, b] upper limit value
-   * @Param maxitor maximum number of repetitions
-   * @Param EPSILON Convergence conditions.If the width of the uncertain section is below this value, it will be converged.
+   * @param	f		The single variable function
+   * @param	a		Lower bound of the search interval [a, b]
+   * @param	b		Upper bound of the search interval [a, b]
+   * @param	maxItor	Maximum number of iterations
+   * @param	epsilon	Convergence criterion. It is considered converged if the width of the uncertain interval is below this value.
    * @return
    */
   template<class Function1>
   OptResult Search(Function1& f, double a, double b) {
-    // Initialize the search results.
+    // Initializes the search results.
     result_ = OptFail;
     iteration_ = 0;
     solution_ = 0;
     value_ = 0;
 
-    // Initialize the uncertain section.
+    // Initializes the uncertain interval.
     double a_k = a;
     double b_k = b;
 
-    // Calculate the function value f_a_k, f_b_k in the end point a_k and b_k of the uncertain section.
+    // Calculates the function values f_a_k, f_b_k at the endpoints a_k, b_k of the uncertain interval.
     double f_a_k = f.Value(a_k);
     double f_b_k = f.Value(b_k);
 
-    // Set the golden ratio.
+    // Sets the golden ratio.
     const double _alpha = 0.61803398874989484820458683436563811772;
 
-    // Select the evaluation point S_K, T_k in the uncertain section [a_k, b_k].
+    // Selects the evaluation points s_k, t_k within the uncertain interval [a_k, b_k].
     double s_k = a_k + (1 - _alpha) * (b_k - a_k);
     double t_k = a_k + _alpha * (b_k - a_k);
 
-    // Calculate the function value f_s_k, f_t_k in the evaluation point S_K and t_k.
+    // Calculates the function values f_s_k, f_t_k at the evaluation points s_k, t_k.
     double f_s_k = f.Value(s_k);
     double f_t_k = f.Value(t_k);
 
-    // Repeat K repeated.
+    // Repeats iteration k.
     for (int k = 1; k <= max_iteration_; k++) {
-      // When selecting [a_k, t_k] as the next uncertain section, True,
-      // When selecting [s_k, b_k], it is a flag of False.
+      // Flag for selecting [a_k, t_k] as the next uncertain interval when true,
+      // and [s_k, b_k] when false.
       bool left = (f_a_k <= f_s_k && f_a_k <= f_t_k && f_a_k <= f_b_k)
                || (f_s_k <= f_a_k && f_s_k <= f_t_k && f_s_k <= f_b_k);
 
-      // The next uncertain section is determined.
+      // Determines the next uncertain interval.
       if (left) {
-        // a_k is the same
+        // Keeps a_k as is.
         b_k = t_k;
         f_b_k = f_t_k;
         t_k = s_k;
@@ -109,7 +109,7 @@ class GoldenSectionLineSearch {
         s_k = a_k + (1 - _alpha) * (b_k - a_k);
         f_s_k = f.Value(s_k);
       } else {
-        // B_k is the same
+        // Keeps b_k as is.
         a_k = s_k;
         f_a_k = f_s_k;
         s_k = t_k;
@@ -118,7 +118,7 @@ class GoldenSectionLineSearch {
         f_t_k = f.Value(t_k);
       }
 
-      // Judge the convergence conditions.
+      // Evaluates the convergence criterion.
       if (b_k - a_k <= epsilon_) {
         result_ = OptSuccess;
         iteration_ = k;
@@ -133,7 +133,7 @@ class GoldenSectionLineSearch {
       }
     }
 
-    // Returns OptMaxitor as the maximum number of repetitions have reached.
+    // Maximum number of iterations reached, returning OptMaxItor.
     result_ = OptMaxItor;
     iteration_ = max_iteration_;
     if (f_a_k <= f_b_k) {
@@ -147,42 +147,42 @@ class GoldenSectionLineSearch {
   }
 
   /**
-   * Set the maximum repetition number.
+   * Sets the maximum number of iterations.
    */
   void set_max_iteration(int max_iteration) {
     max_iteration_ = max_iteration;
   }
 
   /**
-   * Set the convergence conditions.
+   * Sets the convergence criteria.
    */
   void set_epsilon(double epsilon) {
     epsilon_ = epsilon;
   }
 
   /**
-   * Get the search results.
+   * Retrieves the search results.
    */
   OptResult result() const {
     return result_;
   }
 
   /**
-   * Acquires the repeated number of exploration.
+   * Retrieves the number of iterations required for the search.
    */
   int iteration() const {
     return iteration_;
   }
 
   /**
-   * Acquires the solution after the search.
+   * Retrieves the solution after the search.
    */
   double solution() const {
     return solution_;
   }
 
   /**
-   * Get the target function value after search.
+   * Retrieves the objective function value after the search.
    */
   double value() const {
     return value_;
@@ -192,32 +192,32 @@ class GoldenSectionLineSearch {
   OPT_CLASS_UNCOPYABLE(GoldenSectionLineSearch)
 
   /**
-   * Maximum number of repeats
+   * Maximum number of iterations
    */
   int max_iteration_;
 
   /**
-   * Convergence conditions
+   * Convergence criterion
    */
   double epsilon_;
 
   /**
-   * Holds search results.
+   * Holds the search results.
    */
   OptResult result_;
 
   /**
-   * Holds the repeated number of repetitions.
+   * Holds the number of iterations required for the search.
    */
   int iteration_;
 
   /**
-   * Holds the solution after search.
+   * Holds the solution after the search.
    */
   double solution_;
 
   /**
-   * Holds the target function value after searching.
+   * Holds the objective function value after the search.
    */
   double value_;
 };

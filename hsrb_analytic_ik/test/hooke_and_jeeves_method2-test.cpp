@@ -25,7 +25,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGE.
 */
-/// @brief Testing classes that optimize by the Hook-and-Jeeven method
+/// @brief Test of a class performing optimization using the Hooke-and-Jeeves method
 #include <gtest/gtest.h>
 
 #include "bi_golden_section_line_search.hpp"
@@ -41,20 +41,20 @@ TEST(HookeAndJeevesMethod2_Test, QuadraticFunction1A_Test) {
   HookeAndJeevesMethod2 search(maxItor, epsilon);
   QuarticFunction2A func;
 
-  // Search in step 1.0.
+  // Explore with Step 1.0.
   {
     double step = 1.0;
     Vector2 x0(0, 3);
     Vector2 expected(2, 1);
 
-    // I will search.
+    // Perform the exploration.
     OptResult result = search.Search(func, lineSearch, x0, step);
 
-    // Verify the search results.
+    // Verify the exploration results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Verify the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(0 <= iteration && iteration <= maxItor);
 
@@ -64,20 +64,20 @@ TEST(HookeAndJeevesMethod2_Test, QuadraticFunction1A_Test) {
     EXPECT_NEAR(expected.v2, solution.v2, epsilon * 10);
   }
 
-  // Search by step 0.1.
+  // Explore with Step 0.1.
   {
     double step = 0.1;
     Vector2 x0(0, 3);
     Vector2 expected(2, 1);
 
-    // I will search.
+    // Perform the exploration.
     OptResult result = search.Search(func, lineSearch, x0, step);
 
-    // Verify the search results.
+    // Verify the exploration results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Verify the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(0 <= iteration && iteration <= maxItor);
 
@@ -87,20 +87,20 @@ TEST(HookeAndJeevesMethod2_Test, QuadraticFunction1A_Test) {
     EXPECT_NEAR(expected.v2, solution.v2, epsilon * 10);
   }
 
-  // Search by step 0.01.
+  // Explore with Step 0.01.
   {
     double step = 0.01;
     Vector2 x0(0, 3);
     Vector2 expected(2, 1);
 
-    // I will search.
+    // Perform the exploration.
     OptResult result = search.Search(func, lineSearch, x0, step);
 
-    // Verify the search results.
+    // Verify the exploration results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Verify the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(0 <= iteration && iteration <= maxItor);
 
@@ -110,20 +110,20 @@ TEST(HookeAndJeevesMethod2_Test, QuadraticFunction1A_Test) {
     EXPECT_NEAR(expected.v2, solution.v2, epsilon * 10);
   }
 
-  // Search by step 10.
+  // Explore with Step 10.
   {
     double step = 10;
     Vector2 x0(0, 3);
     Vector2 expected(2, 1);
 
-    // I will search.
+    // Perform the exploration.
     OptResult result = search.Search(func, lineSearch, x0, step);
 
-    // Verify the search results.
+    // Verify the exploration results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Verify the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(0 <= iteration && iteration <= maxItor);
 
@@ -133,20 +133,20 @@ TEST(HookeAndJeevesMethod2_Test, QuadraticFunction1A_Test) {
     EXPECT_NEAR(expected.v2, solution.v2, epsilon * 10);
   }
 
-  // Search by step 100.
+  // Explore with Step 100.
   {
     double step = 100;
     Vector2 x0(0, 3);
     Vector2 expected(2, 1);
 
-    // I will search.
+    // Perform the exploration.
     OptResult result = search.Search(func, lineSearch, x0, step);
 
-    // Verify the search results.
+    // Verify the exploration results.
     EXPECT_EQ(OptSuccess, result);
     EXPECT_EQ(OptSuccess, search.result());
 
-    // Verify the number of repetitions.
+    // Verify the number of iterations.
     int iteration = search.iteration();
     EXPECT_TRUE(0 <= iteration && iteration <= maxItor);
 

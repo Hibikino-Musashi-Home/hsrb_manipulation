@@ -25,7 +25,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGE.
 */
-/// @brief Testing adapter groups that operate the function
+/// @brief Test a group of adapters that perform operations on functions
 #include <gtest/gtest.h>
 
 #include "function_adapters.hpp"
@@ -33,7 +33,7 @@ DAMAGE.
 
 namespace opt {
 ////////////////////////////////////////////////////////////////////////////////
-//// Shift adapter test
+//// Test for Shift Adapter
 
 // f(x)=(x-1)^4  (x∈[0,2])
 class TestFunctionA {
@@ -52,7 +52,7 @@ class TestFunctionA {
   }
 };
 
-// A function that moved TestFunctiona only 1 to the right.In other words:
+// Function which moves TestFunctionA to the right by 1. That is:
 // f(x)=(x-2)^4  (x∈[1,3])
 class TestFunctionB {
  public:
@@ -75,7 +75,7 @@ TEST(FunctionAdapters_Test, ShiftAdapterFnuction1_Test) {
   TestFunctionB funcB;
   ShiftAdapterFunction1<TestFunctionA> funcC(funcA, 1);
 
-  // Confirm that FUNCB == FUNCC.
+  // Verify that funcB == funcC.
   EXPECT_EQ(funcB.IsFeasible(-1), funcC.IsFeasible(-1));
   EXPECT_EQ(funcB.IsFeasible(0), funcC.IsFeasible(0));
   EXPECT_EQ(funcB.IsFeasible(1), funcC.IsFeasible(1));
@@ -106,7 +106,7 @@ TEST(FunctionAdapters_Test, ShiftAdapterFnuction1_Test) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//// Reverse adapter test
+//// Test for Reverse Adapter
 
 // f(x)=(x-1)^3  (x∈[1,3])
 class TestFunctionD {
@@ -125,7 +125,7 @@ class TestFunctionD {
   }
 };
 
-// A function in which TestFunctiona is inverted around the X axis, that is,:
+// Function which mirrors TestFunctionA around the X-axis, that is:
 // f(x)=(-x-1)^3  (x∈[-3,-1])
 class TestFunctionE {
  public:
@@ -148,7 +148,7 @@ TEST(FunctionAdapters_Test, ReverseAdapterFnuction1_Test) {
   TestFunctionE funcE;
   ReverseAdapterFunction1<TestFunctionD> funcF(funcD);
 
-  // Check that FUNCE == FUNCF.
+  // Verify that funcE == funcF.
   EXPECT_EQ(funcE.IsFeasible(-3), funcF.IsFeasible(-3));
   EXPECT_EQ(funcE.IsFeasible(-2), funcF.IsFeasible(-2));
   EXPECT_EQ(funcE.IsFeasible(-1), funcF.IsFeasible(-1));
@@ -183,34 +183,34 @@ TEST(FunctionAdapters_Test, ReverseAdapterFnuction1_Test) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-//// Test of direction adapter
+//// Test for Direction Adapter
 
 TEST(FunctionAdapters_Test, DirectionAdapterFnuction1_Test) {
   {
-    // Create a primary function from point (0,3) to direction (1,0) for two variables quadruple numbers.
+    // Create a linear function toward direction (1,0) from point (0,3) for a bivariate quartic function QuarticFunction2A.
     QuarticFunction2A func2;
     Vector2 x(0, 3);
     Vector2 d(1, 0);
     DirectionAdapterFunction2<QuarticFunction2A> func1(func2, x, d);
 
-    // It should be Func1 (5) == FUNC2 (5,3).
+    // It should be that func1(5) == func2(5,3).
     EXPECT_EQ(func2.Value(Vector2(5, 3)), func1.Value(5));
 
-    // It should be Func1 (-7) == Func2 (-7,3).
+    // It should be that func1(-7) == func2(-7,3).
     EXPECT_EQ(func2.Value(Vector2(-7, 3)), func1.Value(-7));
   }
 
   {
-    // Create a primary function from point (0,3) to direction (1, -1) for two variables quadruples quarticFunction2a.
+    // Create a linear function toward direction (1,-1) from point (0,3) for a bivariate quartic function QuarticFunction2A.
     QuarticFunction2A func2;
     Vector2 x(0, 3);
     Vector2 d(1, -1);
     DirectionAdapterFunction2<QuarticFunction2A> func1(func2, x, d);
 
-    // It should be Func1 (2) == FUNC2 (2,1).
+    // It should be that func1(2) == func2(2,1).
     EXPECT_EQ(func2.Value(Vector2(2, 1)), func1.Value(2));
 
-    // FUNC1 (-7) == Func2 (-7,10) should be.
+    // It should be that func1(-7) == func2(-7,10).
     EXPECT_EQ(func2.Value(Vector2(-7, 10)), func1.Value(-7));
   }
 }

@@ -29,6 +29,7 @@ DAMAGE.
 #ifndef HSRB_ANALYTIC_IK_COMMON_HPP_
 #define HSRB_ANALYTIC_IK_COMMON_HPP_
 
+#define _USE_MATH_DEFINES  // To use M_PI, etc.
 #include <cmath>
 
 namespace opt {
@@ -38,12 +39,12 @@ namespace opt {
   Class& operator=(const Class&);
 
 /**
- * This is a constant that represents the result of optimization.
+ * Constants representing the results of optimization.
  */
 enum OptResult {
-  OptSuccess,
-  OptMaxItor,
-  OptFail \
+  OptSuccess,  // Success (Converged)
+  OptMaxItor,  // Maximum number of iterations reached
+  OptFail  // Failure (Did not converge, No solution)
 };
 
 #ifndef M_PI

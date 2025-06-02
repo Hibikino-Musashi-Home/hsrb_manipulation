@@ -44,6 +44,7 @@ class HsrcIKSolver : public HybridIKSolverBase {
  public:
   HsrcIKSolver();
 
+  /// @param [IN] successor IK to pass next with Next
   explicit HsrcIKSolver(tmc_robot_kinematics_model::IKSolver::Ptr successor);
 
   virtual ~HsrcIKSolver() = default;
@@ -53,6 +54,7 @@ class HsrcBaseYawIKSolver : public BaseYawIKSolver {
  public:
   HsrcBaseYawIKSolver();
 
+  /// @param [IN] successor IK to pass next with Next
   explicit HsrcBaseYawIKSolver(tmc_robot_kinematics_model::IKSolver::Ptr successor);
 
   virtual ~HsrcBaseYawIKSolver() = default;

@@ -25,7 +25,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGE.
 */
-/// @brief Test function group
+/// @brief Functions for testing
 #ifndef HSRB_ANALYTIC_IK_FUNCTION_FOR_TESTING_HPP_
 #define HSRB_ANALYTIC_IK_FUNCTION_FOR_TESTING_HPP_
 
@@ -36,9 +36,9 @@ DAMAGE.
 namespace opt {
 
 /**
- * Primary function A for testing.
+ * Linear function A for testing.
  * f(x) = 2*x + 1
- * There is no minimum price.
+ * It does not have a minimum value.
  */
 class LinearFunction1A {
  public:
@@ -54,9 +54,9 @@ class LinearFunction1A {
 };
 
 /**
- * Secondary function A for testing.
+ * Quadratic function A for testing.
  * f(x) = (x-1)^2 + 2
- * In x = 1, take the minimum value f (x) = 2.
+ * It takes the minimum value f(x)=2 at x=1.
  */
 class QuadraticFunction1A {
  public:
@@ -72,9 +72,9 @@ class QuadraticFunction1A {
 };
 
 /**
- * This is a secondary function B for testing.
+ * Quadratic function B for testing.
  * f(x) = 1/2*(x+1)^2 - 1/2
- *In x = -1, the minimum value f (x) = 1/2 is taken.
+ * It takes the minimum value f(x)=1/2 at x=-1.
  */
 class QuadraticFunction1B {
  public:
@@ -90,12 +90,12 @@ class QuadraticFunction1B {
 };
 
 /**
- * It is an unauthorized function for testing.
+ * Non-differentiable function for testing.
  *
  * f(x) = -x/2        (if x <= -1)
  * f(x) = 2*x + 5/2   (if x > -1)
  *
- * X = -1 has the minimum value F (x) = 0.5.
+ * It has the minimum value f(x)=0.5 at x=-1.
  */
 class NonDiffenrentialFunction1A {
  public:
@@ -117,13 +117,13 @@ class NonDiffenrentialFunction1A {
 };
 
 /**
- * It is a reverse -type function for testing.
+ * Inverted trapezoidal function for testing.
  *
  * f(x) = -x + 2 (if x < -1)
  * f(x) = 3      (if  -1 <= x <= 2);
  * f(x) = x+1    (if 2 < x)
  *
- * X = -1 has the minimum value F (x) = 0.5.
+ * It has the minimum value f(x)=0.5 at x=-1.
  */
 class InvertedTrapeziumFunction1A {
  public:
@@ -148,13 +148,13 @@ class InvertedTrapeziumFunction1A {
 
 
 /**
- * Discontinued function A for testing.
+ * Discontinuous function A for testing.
  *
  * f(x) = -2*x + 1 (if x < 1)
  * f(x) = x-1      (if 1 <= x < 2);
  * f(x) = x        (if 2 <= x)
  *
- * X = -1 has the minimum value F (x) = 0.5.
+ * It has the minimum value f(x)=0.5 at x=-1.
  */
 class DiscontinuousFunction1A {
  public:
@@ -178,14 +178,14 @@ class DiscontinuousFunction1A {
 };
 
 /**
- * It is a non -continuous function B for testing.
- * Penalties similar to the penalty function of Robotofunction2.
+ * Discontinuous function B for testing.
+ * It imposes a penalty similar to the RobotoFunction2 penalty.
  *
  * f(x) = x^2        (if -1 <= x <= 1)
  * f(x) = +x + BIG   (if 1 < x)
  * f(x) = -x + BIG   (if x < -1)
  *
- * X = -1 has the minimum value F (x) = 0.5.
+ * It has the minimum value f(x)=0.5 at x=-1.
  */
 class DiscontinuousFnction1B {
  public:
@@ -225,15 +225,15 @@ class DiscontinuousFnction1B {
 };
 
 /**
- * It is a non -convex function for testing.
- * Sin function is connected at point x = 2n, and the amplitude is ABS (n).
- * X = 2n is impossible to differentiate, but it is easy to understand the minimum point in the section.
+ * Non-convex function for testing.
+ * It connects sin functions at point x=2n with amplitude set to abs(n).
+ * It is non-differentiable at x=2n, but the minimum point within the interval is clear.
  *
  * f(x) = sin (PI * x) * abs(n)   (if x∈[2n-2,2n]);
  *
- * In the section [0, 1], the minimum value is set at x = 0,1.
- *In the section [0, 2], the minimum price is taken at x = 3/2.
- *In the section [0, 4], the minimum price is taken at x = 7/2.
+ * In the interval [0, 1], it takes minimum values at x=0,1.
+ * In the interval [0, 2], it takes a minimum value at x=3/2.
+ * In the interval [0, 4], it takes a minimum value at x=7/2.
  *
  */
 class NonConvexFunction1A {
@@ -253,11 +253,11 @@ class NonConvexFunction1A {
 };
 
 /**
- * Forty -fourth function A for testing.
+ * Quartic function A for testing.
  *
  * f(x) = (x1-2)^4 + (x1-2*x2)^2
  *
- * Take a minimum of 0 at points (2,1).
+ * It takes the minimum value 0 at point (2,1).
  *
  */
 class QuarticFunction2A {

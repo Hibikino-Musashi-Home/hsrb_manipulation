@@ -25,7 +25,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGE.
 */
-/// @brief Class that represents 2x2 matrix
+/// @brief Class representing a 2x2 matrix
 #ifndef HSRB_ANALYTIC_IK_MATRIX_2_HPP_
 #define HSRB_ANALYTIC_IK_MATRIX_2_HPP_
 
@@ -34,7 +34,7 @@ DAMAGE.
 namespace opt {
 
 /**
- * A class that represents a 2x2 matrix.
+ * This is a class representing a 2x2 matrix.
  */
 struct Matrix2 {
   double m11;
@@ -66,7 +66,7 @@ struct Matrix2 {
   }
 
   /**
-   * Calculate the matrix x* y '.
+   * Calculates the matrix x*y'.
    */
   static Matrix2 Tod(const Vector2& x, const Vector2& y) {
     return Matrix2(x.v1 * y.v1, x.v1 * y.v2, x.v2 * y.v1, x.v2 * y.v2);

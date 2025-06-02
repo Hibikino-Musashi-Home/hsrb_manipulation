@@ -1,20 +1,16 @@
 <package format="3">
   <name>hsrb_analytic_ik</name>
-  <version>2.0.0</version>
-  <description>
-    HSR-B's hybrid inverse kinematics package.
-    This provides ik function.
-  </description>
+  <version>2.1.0</version>
+  <description>HSR-B's hybrid inverse kinematics package.
+This provides the ik function.</description>
   <maintainer email="xr-hsr-support@mail.toyota.co.jp">HSR Support</maintainer>
   
   <license>BSD 3-clause Clear License</license>
 
-  <author>Keisuke Takeshita</author>
   <author>Koji Terada</author>
-  <author>Takashi Yamamoto</author>
-
+  
   <buildtool_depend>ament_cmake</buildtool_depend>
-
+  
   <depend>tmc_robot_kinematics_model</depend>
   <depend>pluginlib</depend>
 

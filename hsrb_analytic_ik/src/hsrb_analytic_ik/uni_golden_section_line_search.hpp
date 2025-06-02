@@ -25,7 +25,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGE.
 */
-/// @brief Class that performs a single -directional golden split linear search method
+/// @brief Class that performs unidirectional golden section line search
 #ifndef HSRB_ANALYTIC_IK_UNI_GOLDEN_SECTION_LINE_SEARCH_HPP_
 #define HSRB_ANALYTIC_IK_UNI_GOLDEN_SECTION_LINE_SEARCH_HPP_
 
@@ -35,7 +35,7 @@ DAMAGE.
 namespace opt {
 
 /**
- * This is a class that performs a single -direction golden split linear search method.
+ * This is a class that performs unidirectional golden section line search.
  */
 class UniGoldenSectionLineSearch {
  public:
@@ -51,51 +51,51 @@ class UniGoldenSectionLineSearch {
         value_(0) {}
 
   /**
-   * Explore within the section (0,+∞).
+   * Performs search within the interval (0,+∞).
    *
-   * @param f one variable function
-   * The initial value of the @param STEP search section [0, STEP]
+   * @param    f       Single variable function
+   * @param    step    Initial value of the search interval [0, step]
    * @return
    */
   template<class Function1>
   OptResult Search(Function1& f, double step) {
-    // Initialize the search results.
+    // Initialize search results.
     result_ = OptFail;
     iteration_ = 0;
     solution_ = 0;
     value_ = 0;
 
-    // Create a golden split straight line search.
+    // Create golden section line search.
     GoldenSectionLineSearch search(max_iteration_, epsilon_);
 
-    // Initialize the search section.
+    // Initialize search interval.
     const double a = 0;
     double b = step;
 
-    // Do the first search for the first time.
+    // Perform the first search.
     OptResult result = search.Search(f, a, b);
 
-    // If you succeed in searching, record the solution.
+    // If the search is successful, record the solution.
     iteration_ = search.iteration();
     solution_ = search.solution();
     value_ = search.value();
     if (result == OptSuccess) {
       result_ = OptSuccess;
-      // Continue to expand the section and explore the solution.
+      // Continue to expand the interval and search for the solution.
     } else if (result == OptMaxItor) {
       result_ = OptMaxItor;
       return result_;
     }
 
-    // If the uniform convex is detected in the first golden split search,
-    // Reduce the step width so that it becomes a semi -convex in the section.
+    // If non-quasi-convexity is detected in the first golden section search,
+    // Reduce the step size to ensure quasi-convexity within the interval.
     if (result == OptFail) {
-      // Repeat K repeated.
+      // Repeat iteration k.
       for (int k = 2; k <= max_iteration_; k++) {
-        // Reduce the section.
+        // Reduce the interval.
         b *= 0.5;
 
-        // I will search.
+        // Perform search.
         OptResult result = search.Search(f, a, b);
 
         if (result == OptSuccess) {
@@ -110,22 +110,22 @@ class UniGoldenSectionLineSearch {
       result_ = OptMaxItor;
       return result_;
     } else {
-      // Repeat K repeated.
+      // Repeat iteration k.
       for (int k = 2; k <= max_iteration_; k++) {
-        // Enlarge the section.
+        // Expand the interval.
         b *= 2;
 
-        // I will search.
+        // Perform search.
         OptResult result = search.Search(f, a, b);
 
         if (result == OptSuccess) {
           double comparativeSolution = search.solution();
           double comparativeValue = search.value();
 
-          // If the previous solution and this solution are close enough, of the two
-          // Solve the smaller the target function value.
-          // If you do not do this, if you judge only by the size of the target function value,
-          // It will be a wasted repetition due to a small calculation error.
+          // If the previous solution and the current solution are sufficiently close,
+          // choose the one with the smaller objective function value as the solution.
+          // Without this, judging only by the objective function value will lead to
+          // unnecessary iterations due to tiny calculation errors.
           if (std::abs(solution_ - comparativeSolution) <= epsilon_) {
             if (comparativeValue < value_) {
               iteration_ = search.iteration();
@@ -134,65 +134,65 @@ class UniGoldenSectionLineSearch {
             }
             return result_;
           } else if (comparativeValue < value_) {
-            // When this solution and the previous solution are far away,
-            // If the target function value is smaller, we will continue to search.
+            // If the current solution and the previous solution are far apart,
+            // and the objective function value is decreasing, continue the search.
             iteration_ = search.iteration();
             solution_ = comparativeSolution;
             value_ = comparativeValue;
             continue;
           } else {
-            // Return the successful solution last time.
+            // Return the previously successful solution.
             return result_;
           }
         } else {
-          // For OptMaxitor or OptFail
-          // Return the successful solution last time.
+          // In case of OptMaxItor or OptFail
+          // Return the previously successful solution.
           return result_;
         }
       }
 
-      // At least once, you have succeeded in searching, so we will solve it.
+      // Since at least one search has been successful, use that as the solution.
       return result_;
     }
   }
 
   /**
-   * Set the maximum repetition number.
+   * Set maximum number of iterations.
    */
   void set_max_iteration(int max_iteration) {
     max_iteration_ = max_iteration;
   }
 
   /**
-   * Set the convergence conditions.
+   * Set convergence criteria.
    */
   void set_epsilon(double epsilon) {
     epsilon_ = epsilon;
   }
 
   /**
-   * Get the search results.
+   * Retrieve search results.
    */
   OptResult result() const {
     return result_;
   }
 
   /**
-   * Acquires the repeated number of exploration.
+   * Retrieve the number of iterations taken during the search.
    */
   int iteration() const {
     return iteration_;
   }
 
   /**
-   * Acquires the solution after the search.
+   * Retrieve the solution after the search.
    */
   double solution() const {
     return solution_;
   }
 
   /**
-   * Get the target function value after search.
+   * Retrieve the objective function value after the search.
    */
   double value() const {
     return value_;
@@ -202,33 +202,33 @@ class UniGoldenSectionLineSearch {
   OPT_CLASS_UNCOPYABLE(UniGoldenSectionLineSearch)
 
   /**
-   * Maximum number of repeats
+   * Maximum number of iterations
    */
   int max_iteration_;
 
   /**
-   * Convergence conditions
-   * (If the width of the uncertain section is below this value, it shall be converged).
+   * Convergence criteria
+   * (If the width of the uncertain interval falls below this value, consider it converged)
    */
   double epsilon_;
 
   /**
-   * Holds search results.
+   * Holds the search results.
    */
   OptResult result_;
 
   /**
-   * Holds the repeated number of repetitions.
+   * Holds the number of iterations taken during the search.
    */
   int iteration_;
 
   /**
-   * Holds the solution after search.
+   * Holds the solution after the search.
    */
   double solution_;
 
   /**
-   * Holds the purpose function value of the solution.
+   * Holds the objective function value of the solution.
    */
   double value_;
 };
