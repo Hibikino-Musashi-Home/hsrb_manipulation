@@ -36,4 +36,4 @@ def generate_launch_description():
     return LaunchDescription([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([ThisLaunchFileDir(), '/hsrb_timeopt_filter.launch.py']),
-            launch_arguments={'configuration_file': 'hsrc_joint_limits.yaml'}.items())])
+            launch_arguments={'timeopt_configuration_file': 'hsrc_joint_limits.yaml'}.items())])
