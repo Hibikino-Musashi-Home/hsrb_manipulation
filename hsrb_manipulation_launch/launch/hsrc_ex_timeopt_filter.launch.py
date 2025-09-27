@@ -1,5 +1,6 @@
-#!/usr/bin/env python
-# Copyright (c) 2024 TOYOTA MOTOR CORPORATION
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Copyright (c) 2025 TOYOTA MOTOR CORPORATION
 # All rights reserved.
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted (subject to the limitations in the disclaimer
@@ -24,7 +25,8 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 # DAMAGE.
-# -*- coding: utf-8 -*-
+#
+# Auther: Tomoaki Fujino (Hibikino-Musashi@Home)
 from launch import LaunchDescription
 
 from launch.actions import IncludeLaunchDescription
@@ -36,4 +38,4 @@ def generate_launch_description():
     return LaunchDescription([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([ThisLaunchFileDir(), '/hsrb_timeopt_filter.launch.py']),
-            launch_arguments={'timeopt_configuration_file': 'hsrc_joint_limits.yaml'}.items())])
+            launch_arguments={'timeopt_configuration_file': 'hsrc_ex_joint_limits.yaml'}.items())])

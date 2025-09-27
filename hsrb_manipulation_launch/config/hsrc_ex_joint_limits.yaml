@@ -1,0 +1,39 @@
+# Auther: Tomoaki Fujino (Hibikino-Musashi@Home)
+/**:
+  ros__parameters:
+    caster_offset: 0.114
+    tread: 0.249
+    wheel_radius: 0.04725
+    arm_lift_joint:
+      velocity: 0.7
+      acceleration: 3.0
+    arm_flex_joint:
+      velocity: 6.0
+      acceleration: 3.0
+    arm_roll_joint:
+      velocity: 4.0
+      acceleration: 3.0
+    wrist_flex_joint:
+      velocity: 6.0
+      acceleration: 3.0
+    wrist_roll_joint:
+      velocity: 6.0
+      acceleration: 3.0
+    hand_motor_joint:
+      velocity: 3.0
+      acceleration: 20.0
+    head_pan_joint:
+      velocity: 9.0
+      acceleration: 4.5
+    head_tilt_joint:
+      velocity: 1.3
+      acceleration: 2.6
+    left_wheel:
+      velocity: 35.0
+      acceleration: 10.0
+    right_wheel:
+      velocity: 35.0
+      acceleration: 10.0
+    caster:
+      velocity: 8.0
+      acceleration: 2.0
